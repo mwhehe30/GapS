@@ -1,38 +1,63 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { supabase } from '@/lib/supabase';
-import { useRouter } from 'next/navigation';
-import Link from 'next/link';
-import Image from 'next/image';
+import { useState } from "react";
+import { supabase } from "@/lib/supabase";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
+import Image from "next/image";
 
 function DecorPanel() {
   return (
-    <div className="relative flex flex-col justify-between p-8 bg-[#e8ecef] rounded-3xl h-full min-h-[480px]">
+    <div className="relative flex flex-col justify-between p-6 bg-[#e8ecef] rounded-3xl inverted-radius-kanan h-full min-h-[480px]">
       <div>
         <h2 className="text-3xl font-black text-gray-900 leading-tight mb-4">
-          Curious about<br />your market<br />value?
+          Curious about
+          <br />
+          your market
+          <br />
+          value?
         </h2>
         <p className="text-sm text-gray-500 leading-relaxed">
-          Temukan skill mana yang membuatmu tertinggal di industri saat ini. Analisis gratis dalam 2 menit.
+          Temukan skill mana yang membuatmu
+          tertinggal di industri saat ini.
+          Analisis gratis dalam 2 menit.
         </p>
       </div>
 
       <div className="flex items-center gap-4 my-6">
-        <Image src="/signup.svg" alt="bar chart" width={64} height={64} />
+        <Image
+          src="/signup.svg"
+          alt="bar chart"
+          width={64}
+          height={64}
+        />
         <p className="text-base font-bold text-gray-800 leading-snug">
-          Turn your data<br />into career<br />growth.
+          Turn your data
+          <br />
+          into career
+          <br />
+          growth.
         </p>
       </div>
 
       <div className="relative bg-[#d4d8dc] rounded-2xl p-4">
-        <p className="font-bold text-gray-800 text-sm mb-1">Bridge the Gap, Land the Job.</p>
+        <p className="font-bold text-gray-800 text-sm mb-1">
+          Bridge the Gap, Land the Job.
+        </p>
         <p className="text-xs text-gray-600 leading-relaxed">
-          Identifikasi celah skill kamu secara instan dan dapatkan rekomendasi pembelajaran yang dipersonalisasi untuk karier impianmu.
+          Identifikasi celah skill kamu secara
+          instan dan dapatkan rekomendasi
+          pembelajaran yang dipersonalisasi untuk
+          karier impianmu.
         </p>
         <div className="absolute -top-3 -right-3 w-8 h-8 bg-gray-700 rounded-full flex items-center justify-center">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="white" xmlns="http://www.w3.org/2000/svg">
-            <path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6z"/>
+          <svg
+            width="14"
+            height="14"
+            viewBox="0 0 24 24"
+            fill="white"
+            xmlns="http://www.w3.org/2000/svg">
+            <path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6z" />
           </svg>
         </div>
       </div>
@@ -47,40 +72,55 @@ export default function SignUp() {
   const handleRegister = async (e) => {
     e.preventDefault();
     setLoading(true);
-    const formData = new FormData(e.currentTarget);
+    const formData = new FormData(
+      e.currentTarget,
+    );
     const { error } = await supabase.auth.signUp({
-      email: formData.get('email'),
-      password: formData.get('password'),
+      email: formData.get("email"),
+      password: formData.get("password"),
       options: {
         data: {
-          first_name: formData.get('first_name'),
-          last_name: formData.get('last_name'),
+          first_name: formData.get("first_name"),
+          last_name: formData.get("last_name"),
         },
       },
     });
     setLoading(false);
     if (error) alert(error.message);
     else {
-      alert('Registrasi berhasil! Silakan cek email kamu.');
-      router.push('/signin');
+      alert(
+        "Registrasi berhasil! Silakan cek email kamu.",
+      );
+      router.push("/signin");
     }
   };
 
   const handleGoogle = async () => {
-    await supabase.auth.signInWithOAuth({ provider: 'google' });
+    await supabase.auth.signInWithOAuth({
+      provider: "google",
+    });
   };
 
   return (
     <div className="min-h-screen bg-[#dde3e8] flex items-center justify-center p-6">
       <div className="flex gap-8 w-full max-w-4xl items-center">
         {/* Form - left */}
-        <div className="flex-1 flex flex-col">
-          <h1 className="text-4xl font-black text-gray-900 mb-1">Ayo, Mulai<br />Identifikasi Skillmu</h1>
-          <p className="text-gray-500 text-sm mb-6">Hanya butuh 1 menit untuk memulai roadmap belajarmu.</p>
+        <div className="flex-1 flex flex-col mx-auto justify-center items-center">
+          <h1 className="text-4xl font-black text-gray-900 mb-1">
+            Ayo, Mulai
+            <br />
+            Identifikasi Skillmu
+          </h1>
+          <p className="text-gray-500 text-sm mb-6">
+            Hanya butuh 1 menit untuk memulai
+            roadmap belajarmu.
+          </p>
 
           {/* Toggle */}
-          <div className="flex bg-[#b0b8c1] rounded-full p-1 mb-6">
-            <Link href="/signin" className="flex-1 text-center py-2 rounded-full text-gray-700 text-sm font-medium hover:text-gray-900 transition-colors">
+          <div className="flex bg-[#b0b8c1] rounded-full p-1 mb-6 w-full max-w-[400px]">
+            <Link
+              href="/signin"
+              className="flex-1 text-center py-2 rounded-full text-gray-700 text-sm font-medium hover:text-gray-900 transition-colors">
               Login
             </Link>
             <span className="flex-1 text-center py-2 rounded-full bg-[#8a9199] text-white text-sm font-medium cursor-default">
@@ -88,21 +128,23 @@ export default function SignUp() {
             </span>
           </div>
 
-          <form onSubmit={handleRegister} className="flex flex-col gap-3">
-            <div className="flex gap-3">
+          <form
+            onSubmit={handleRegister}
+            className="flex flex-col gap-3 w-full max-w-[400px]">
+            <div className="flex flex-col md:flex-row gap-3 ">
               <input
                 name="first_name"
                 type="text"
                 placeholder="Nama Depan"
                 required
-                className="flex-1 px-4 py-3 rounded-full bg-[#8a9199] text-white placeholder-gray-200 outline-none focus:ring-2 focus:ring-gray-500"
+                className="w-full flex-1 px-4 py-3 rounded-full bg-[#8a9199] text-white placeholder-gray-200 outline-none focus:ring-2 focus:ring-gray-500 min-w-[188px]"
               />
               <input
                 name="last_name"
                 type="text"
                 placeholder="Nama Belakang"
                 required
-                className="flex-1 px-4 py-3 rounded-full bg-[#8a9199] text-white placeholder-gray-200 outline-none focus:ring-2 focus:ring-gray-500"
+                className="w-full flex-1 px-4 py-3 rounded-full bg-[#8a9199] text-white placeholder-gray-200 outline-none focus:ring-2 focus:ring-gray-500 min-w-[200px]"
               />
             </div>
             <input
@@ -110,29 +152,30 @@ export default function SignUp() {
               type="email"
               placeholder="Email"
               required
-              className="w-full px-4 py-3 rounded-full bg-[#8a9199] text-white placeholder-gray-200 outline-none focus:ring-2 focus:ring-gray-500"
+              className="px-4 py-3 rounded-full bg-[#8a9199] text-white placeholder-gray-200 outline-none focus:ring-2 focus:ring-gray-500"
             />
             <input
               name="password"
               type="password"
               placeholder="Password"
               required
-              className="w-full px-4 py-3 rounded-full bg-[#8a9199] text-white placeholder-gray-200 outline-none focus:ring-2 focus:ring-gray-500"
+              className="px-4 py-3 rounded-full bg-[#8a9199] text-white placeholder-gray-200 outline-none focus:ring-2 focus:ring-gray-500"
             />
 
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-3 rounded-full bg-[#c8cdd2] text-gray-800 font-medium hover:bg-[#b8bec4] transition-colors disabled:opacity-60"
-            >
-              {loading ? 'Memuat...' : 'Daftar'}
+              className="py-3 rounded-full bg-[#c8cdd2] text-gray-800 font-medium hover:bg-[#b8bec4] transition-colors disabled:opacity-60 ">
+              {loading ? "Memuat..." : "Daftar"}
             </button>
           </form>
 
           {/* Divider */}
-          <div className="flex items-center gap-3 my-4">
+          <div className="w-full max-w-[400px] flex items-center gap-3 my-4">
             <div className="flex-1 h-px bg-gray-400" />
-            <span className="text-xs text-gray-500">Or</span>
+            <span className="text-xs text-gray-500">
+              Or
+            </span>
             <div className="flex-1 h-px bg-gray-400" />
           </div>
 
@@ -140,13 +183,28 @@ export default function SignUp() {
           <div className="flex justify-center">
             <button
               onClick={handleGoogle}
-              className="w-12 h-12 rounded-full bg-[#c8cdd2] flex items-center justify-center hover:bg-[#b8bec4] transition-colors"
-            >
-              <svg width="20" height="20" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
-                <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
-                <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/>
-                <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+              className="w-12 h-12 rounded-full bg-[#c8cdd2] flex items-center justify-center hover:bg-[#b8bec4] transition-colors">
+              <svg
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                xmlns="http://www.w3.org/2000/svg">
+                <path
+                  d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
+                  fill="#4285F4"
+                />
+                <path
+                  d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+                  fill="#34A853"
+                />
+                <path
+                  d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z"
+                  fill="#FBBC05"
+                />
+                <path
+                  d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
+                  fill="#EA4335"
+                />
               </svg>
             </button>
           </div>
