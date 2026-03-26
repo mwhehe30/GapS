@@ -113,3 +113,13 @@ h6 {
     drop-shadow(0px 2px 4px rgba(0, 0, 0, 0.02));
   transition: filter 0.3s ease;
 }
+
+.inverted-bottom-card-kiri {
+  corner-shape: round;
+  border-top-left-radius: 60px;
+}
+
+.inverted-bottom-card-kanan {
+  corner-shape: round;
+  border-top-right-radius: 60px;
+}

@@ -8,7 +8,7 @@ import Image from "next/image";
 
 function DecorPanel() {
   return (
-    <div className="relative flex flex-col justify-between p-6 bg-[#e8ecef] rounded-3xl inverted-radius-kanan h-full min-h-[480px]">
+    <div className="relative flex flex-col justify-between p-6 bg-[#e8ecef] rounded-3xl inverted-radius-kanan max-h-full">
       <div>
         <h2 className="text-3xl font-black text-gray-900 leading-tight mb-4">
           Curious about
@@ -40,7 +40,7 @@ function DecorPanel() {
         </p>
       </div>
 
-      <div className="relative bg-[#d4d8dc] rounded-2xl p-4">
+      <div className="relative bg-[#d4d8dc] rounded-2xl p-4 inverted-bottom-card-kanan">
         <p className="font-bold text-gray-800 text-sm mb-1">
           Bridge the Gap, Land the Job.
         </p>
@@ -103,7 +103,7 @@ export default function SignUp() {
 
   return (
     <div className="min-h-screen bg-[#dde3e8] flex items-center justify-center p-6">
-      <div className="flex gap-8 w-full max-w-4xl items-center">
+      <div className="flex gap-8 w-full max-w-4xl items-stretch">
         {/* Form - left */}
         <div className="flex-1 flex flex-col mx-auto justify-center items-center">
           <h1 className="text-4xl font-black text-gray-900 mb-1">
@@ -117,7 +117,7 @@ export default function SignUp() {
           </p>
 
           {/* Toggle */}
-          <div className="flex bg-[#b0b8c1] rounded-full p-1 mb-6 w-full max-w-[400px]">
+          <div className="flex bg-[#b0b8c1] rounded-full p-1 mb-6 w-full max-w-100">
             <Link
               href="/signin"
               className="flex-1 text-center py-2 rounded-full text-gray-700 text-sm font-medium hover:text-gray-900 transition-colors">
@@ -130,21 +130,21 @@ export default function SignUp() {
 
           <form
             onSubmit={handleRegister}
-            className="flex flex-col gap-3 w-full max-w-[400px]">
+            className="flex flex-col gap-3 w-full max-w-100">
             <div className="flex flex-col md:flex-row gap-3 ">
               <input
                 name="first_name"
                 type="text"
                 placeholder="Nama Depan"
                 required
-                className="w-full flex-1 px-4 py-3 rounded-full bg-[#8a9199] text-white placeholder-gray-200 outline-none focus:ring-2 focus:ring-gray-500 min-w-[188px]"
+                className="w-full flex-1 px-4 py-3 rounded-full bg-[#8a9199] text-white placeholder-gray-200 outline-none focus:ring-2 focus:ring-gray-500 min-w-47"
               />
               <input
                 name="last_name"
                 type="text"
                 placeholder="Nama Belakang"
                 required
-                className="w-full flex-1 px-4 py-3 rounded-full bg-[#8a9199] text-white placeholder-gray-200 outline-none focus:ring-2 focus:ring-gray-500 min-w-[200px]"
+                className="w-full flex-1 px-4 py-3 rounded-full bg-[#8a9199] text-white placeholder-gray-200 outline-none focus:ring-2 focus:ring-gray-500 min-w-50"
               />
             </div>
             <input
@@ -171,7 +171,7 @@ export default function SignUp() {
           </form>
 
           {/* Divider */}
-          <div className="w-full max-w-[400px] flex items-center gap-3 my-4">
+          <div className="w-full max-w-100 flex items-center gap-3 my-4">
             <div className="flex-1 h-px bg-gray-400" />
             <span className="text-xs text-gray-500">
               Or

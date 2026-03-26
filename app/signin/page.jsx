@@ -8,10 +8,10 @@ import Image from "next/image";
 
 function DecorPanel() {
   return (
-    <div className="relative flex flex-col justify-between p-8 bg-[#e8ecef] rounded-3xl shadow-custom-card inverted-radius-kiri  h-full min-h-[480px]">
+    <div className="relative flex flex-col justify-between p-8 bg-[#e8ecef] rounded-3xl shadow-custom-card inverted-radius-kiri max-h-full text-right">
       {/* Top text */}
       <div>
-        <h2 className="text-3xl font-black text-gray-900 leading-tight mb-4 text-right">
+        <h2 className="text-3xl font-black text-gray-900 leading-tight mb-4">
           Curious about
           <br />
           your market
@@ -26,7 +26,7 @@ function DecorPanel() {
       </div>
 
       {/* Middle icon + text */}
-      <div className="flex items-center gap-4 my-6">
+      <div className="flex items-center justify-end gap-4 my-6">
         <Image
           src="/signin.svg"
           alt="line chart"
@@ -43,7 +43,7 @@ function DecorPanel() {
       </div>
 
       {/* Bottom card */}
-      <div className="relative bg-[#d4d8dc] rounded-2xl p-4">
+      <div className="relative bg-[#d4d8dc] rounded-2xl p-4 inverted-bottom-card-kiri">
         <p className="font-bold text-gray-800 text-sm mb-1">
           Bridge the Gap, Land the Job.
         </p>
@@ -54,7 +54,7 @@ function DecorPanel() {
           karier impianmu.
         </p>
         {/* Star badge */}
-        <div className="absolute -top-3 -right-3 w-8 h-8 bg-gray-700 rounded-full flex items-center justify-center">
+        <div className="absolute -top-3 -left-3 w-8 h-8 bg-gray-700 rounded-full flex items-center justify-center">
           <svg
             width="14"
             height="14"
@@ -97,7 +97,7 @@ export default function SignIn() {
 
   return (
     <div className="min-h-screen bg-[#dde3e8] flex items-center justify-center p-6">
-      <div className="flex gap-8 w-full max-w-4xl items-center">
+      <div className="flex gap-8 w-full max-w-4xl items-stretch">
         {/* Decor panel - left */}
         <div className="hidden md:flex flex-1">
           <DecorPanel />
@@ -114,7 +114,7 @@ export default function SignIn() {
           </p>
 
           {/* Toggle */}
-          <div className="flex bg-[#b0b8c1] rounded-full p-1 mb-6 w-full max-w-[400px]">
+          <div className="flex bg-[#b0b8c1] rounded-full p-1 mb-6 w-full max-w-100">
             <span className="flex-1 text-center py-2 rounded-full bg-[#8a9199] text-white text-sm font-medium cursor-default">
               Login
             </span>
@@ -127,7 +127,7 @@ export default function SignIn() {
 
           <form
             onSubmit={handleLogin}
-            className="flex flex-col gap-3 w-full max-w-[400px]">
+            className="flex flex-col gap-3 w-full max-w-100">
             <input
               name="email"
               type="email"
@@ -155,7 +155,7 @@ export default function SignIn() {
           </form>
 
           {/* Divider */}
-          <div className="w-full max-w-[400px] flex items-center gap-3 my-4">
+          <div className="w-full max-w-100 flex items-center gap-3 my-4">
             <div className="flex-1 h-px bg-gray-400" />
             <span className="text-xs text-gray-500">
               Or
