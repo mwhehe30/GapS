@@ -12,8 +12,10 @@ import {
   Linkedin,
   Twitter,
   Instagram,
+  UserCircle,
+  BookMarked,
+  CheckCircle,
 } from 'lucide-react';
-import { UserCircle, BookMarked } from 'lucide-react';
 
 const steps = [
   {
@@ -96,10 +98,10 @@ const page = () => {
     <main className='bg-gray-200'>
       <NavBar />
 
-      <section className='bg-gray-200'>
-        <div className='container mx-auto py-12 md:py-16 2xl:py-24 px-4 grid grid-cols-1 md:grid-cols-2 gap-10 items-center'>
+      <section className='bg-gray-200 overflow-hidden relative'>
+        <div className='container mx-auto py-12 md:py-16 2xl:py-24 px-4 grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-10 items-center relative z-10'>
           <div className='flex flex-col gap-8'>
-            <h1 className='text-4xl sm:text-5xl 2xl:text-7xl font-semibold leading-tight'>
+            <h1 className='text-4xl sm:text-5xl 2xl:text-8xl font-semibold leading-tight'>
               Tutupi Kekurangan untuk Posisi Impian
             </h1>
             <p className='text-gray-900/70 max-w-lg text-sm sm:text-base'>
@@ -111,20 +113,127 @@ const page = () => {
             <div className='flex flex-wrap gap-4'>
               <Link
                 href='/analysis'
-                className='bg-gray-700 text-white px-5 py-2.5 rounded-lg text-sm font-medium hover:bg-gray-800 transition-colors'
+                className='bg-gray-900 text-white px-6 py-3.5 rounded-xl text-sm font-bold hover:bg-gray-800 transition-all shadow-lg hover:shadow-xl hover:-translate-y-0.5'
               >
                 Analisis Skill Saya
               </Link>
               <Link
                 href='#how-it-works'
-                className='text-gray-900 px-5 py-2.5 rounded-lg text-sm font-medium hover:bg-gray-300 transition-colors'
+                className='text-gray-900 px-6 py-3.5 rounded-xl text-sm font-bold bg-gray-300 hover:bg-gray-400 transition-all'
               >
                 Cara Kerja
               </Link>
             </div>
           </div>
 
-          <div></div>
+          {/* Graphical Dashboard Mockup */}
+          <div className='relative w-full mt-10 lg:mt-0'>
+            <div className='relative rounded-2xl bg-white shadow-2xl border border-gray-200 overflow-hidden'>
+              {/* Window Header */}
+              <div className='bg-gray-100 h-10 px-4 flex items-center gap-2 border-b border-gray-200'>
+                <div className='size-3 rounded-full bg-red-400'></div>
+                <div className='size-3 rounded-full bg-amber-400'></div>
+                <div className='size-3 rounded-full bg-green-400'></div>
+              </div>
+
+              {/* App Body */}
+              <div className='flex p-4 gap-4 h-[350px] sm:h-[400px] bg-gray-50'>
+                {/* Sidebar */}
+                <div className='hidden sm:flex w-1/4 flex-col gap-3'>
+                  <div className='h-8 w-2/3 bg-gray-900 rounded-lg mb-4'></div>
+                  <div className='h-10 w-full bg-white rounded-xl shadow-sm border border-gray-100 flex items-center px-3 gap-2'>
+                    <div className='size-4 bg-gray-200 rounded'></div>
+                    <div className='h-2.5 w-1/2 bg-gray-200 rounded'></div>
+                  </div>
+                  <div className='h-10 w-full bg-transparent rounded-xl flex items-center px-3 gap-2'>
+                    <div className='size-4 bg-gray-300 rounded'></div>
+                    <div className='h-2.5 w-2/3 bg-gray-300 rounded'></div>
+                  </div>
+                  <div className='h-10 w-full bg-transparent rounded-xl flex items-center px-3 gap-2'>
+                    <div className='size-4 bg-gray-300 rounded'></div>
+                    <div className='h-2.5 w-1/2 bg-gray-300 rounded'></div>
+                  </div>
+                </div>
+
+                {/* Main Content */}
+                <div className='flex-1 flex flex-col gap-4'>
+                  {/* Header strings */}
+                  <div className='flex justify-between items-end'>
+                    <div>
+                      <div className='h-5 w-32 bg-gray-800 rounded-lg mb-2'></div>
+                      <div className='h-3 w-48 bg-gray-400 rounded-lg'></div>
+                    </div>
+                    <div className='size-10 rounded-full bg-indigo-100 border border-indigo-200 flex items-center justify-center'>
+                      <div className='size-4 rounded-full bg-indigo-500'></div>
+                    </div>
+                  </div>
+
+                  {/* Top Stats */}
+                  <div className='grid grid-cols-2 gap-4'>
+                    <div className='bg-white p-4 rounded-2xl shadow-sm border border-gray-100'>
+                      <div className='h-3 w-20 bg-gray-300 rounded mb-3'></div>
+                      <div className='flex items-end gap-2'>
+                        <div className='h-7 w-16 bg-gray-900 rounded'></div>
+                        <div className='h-5 w-10 bg-green-100 rounded text-green-600 flex items-center justify-center text-[10px] font-bold'>
+                          +12%
+                        </div>
+                      </div>
+                    </div>
+                    <div className='bg-white p-4 rounded-2xl shadow-sm border border-gray-100'>
+                      <div className='h-3 w-24 bg-gray-300 rounded mb-3'></div>
+                      <div className='flex items-end gap-2'>
+                        <div className='h-7 w-20 bg-gray-900 rounded'></div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Main Chart Area */}
+                  <div className='flex-1 bg-white rounded-2xl shadow-sm border border-gray-100 p-4 flex flex-col justify-between'>
+                    <div className='flex justify-between items-center mb-4'>
+                      <div className='h-4 w-32 bg-gray-800 rounded'></div>
+                      <div className='h-6 w-20 bg-indigo-50 rounded-lg'></div>
+                    </div>
+                    <div className='flex items-end gap-2 h-full pt-4'>
+                      <div className='w-full bg-indigo-100 rounded-t-lg h-[40%] transition-all duration-1000'></div>
+                      <div className='w-full bg-indigo-200 rounded-t-lg h-[60%] transition-all duration-1000 delay-100'></div>
+                      <div className='w-full bg-indigo-300 rounded-t-lg h-[50%] transition-all duration-1000 delay-200'></div>
+                      <div className='w-full bg-indigo-400 rounded-t-lg h-[80%] transition-all duration-1000 delay-300'></div>
+                      <div className='w-full bg-indigo-500 rounded-t-lg h-[65%] transition-all duration-1000 delay-400'></div>
+                      <div className='w-full bg-indigo-600 rounded-t-lg h-[90%] transition-all duration-1000 delay-500'></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Floating Element 1 (Score) */}
+            <div
+              className='absolute -left-4 md:-left-12 lg:-left-16 top-24 bg-white p-4 rounded-2xl shadow-xl border border-gray-100 flex items-center gap-4 animate-bounce'
+              style={{ animationDuration: '4s' }}
+            >
+              <div className='size-12 rounded-full bg-green-100 flex items-center justify-center shrink-0 border border-green-200'>
+                <Target className='text-green-600 size-6' />
+              </div>
+              <div>
+                <p className='text-[10px] text-gray-500 font-bold uppercase tracking-widest'>
+                  Match Score
+                </p>
+                <p className='text-2xl font-black text-gray-900'>85%</p>
+              </div>
+            </div>
+
+            {/* Floating Element 2 (Skill Alert) */}
+            <div className='absolute -right-2 md:-right-8 lg:-right-10 bottom-16 bg-gray-900 p-4 rounded-2xl shadow-2xl flex items-center gap-3 animate-pulse'>
+              <div className='size-8 rounded-full bg-indigo-500/20 border border-indigo-400/50 flex items-center justify-center shrink-0'>
+                <CheckCircle className='text-indigo-400 size-4' />
+              </div>
+              <div>
+                <p className='text-sm text-white font-bold tracking-wide'>
+                  Skill Mastered!
+                </p>
+              </div>
+            </div>
+          </div>
         </div>
       </section>
 

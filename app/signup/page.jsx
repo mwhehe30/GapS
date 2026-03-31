@@ -75,13 +75,15 @@ export default function SignUp() {
     const formData = new FormData(
       e.currentTarget,
     );
+    const firstName = formData.get("first_name");
+    const lastName = formData.get("last_name");
+
     const { error } = await supabase.auth.signUp({
       email: formData.get("email"),
       password: formData.get("password"),
       options: {
         data: {
-          first_name: formData.get("first_name"),
-          last_name: formData.get("last_name"),
+          full_name: `${firstName} ${lastName}`.trim(),
         },
       },
     });
