@@ -11,8 +11,8 @@ export default function RootLayout({ children }) {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
-  const pathname = usePathname(); // Mendapatkan path saat ini
-  const [isMenuOpen, setIsMenuOpen] = useState(false); // Mobile menu state
+  const pathname = usePathname(); // Cari tahu lagi di halaman mana sekarang
+  const [isMenuOpen, setIsMenuOpen] = useState(false); // Status menu mobile (tutup/buka)
 
   useEffect(() => {
     const getUser = async () => {
@@ -36,13 +36,19 @@ export default function RootLayout({ children }) {
   };
 
   const logout = async () => {
+    // Hapus semua data simpanan lokal biar bersih
+    Object.keys(localStorage).forEach(key => {
+      if (key.startsWith('gaps_')) {
+        localStorage.removeItem(key);
+      }
+    });
     await supabase.auth.signOut();
     router.push('/signin');
   };
 
-  // Jika loading, tampilkan loading state atau null
+  // Tampilin null/kosong dulu pas lagi nunggu status login
   if (loading) {
-    return null; // atau loading spinner
+    return null; 
   }
 
   return (

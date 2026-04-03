@@ -70,7 +70,7 @@ export default function Page() {
       setSkills(userSkillsData || []);
       setCompletedProgress(progressData || []);
 
-      // Fetch analysis + roadmap
+      // Ambil data analisis dan roadmap user
       if (session?.access_token) {
         setAnalysisLoading(true);
         try {
@@ -81,12 +81,16 @@ export default function Page() {
           setAnalysis(analysisData);
           setRoadmap(roadmapData.roadmap);
         } catch (err) {
-          // Suppress the "Cannot coerce..." error for new users who haven't run an analysis yet
-          if (err?.message?.includes('Cannot coerce')) {
+          // Abaikan error kalau user memang belum pernah analisis (biar gak muncul teks error aneh)
+          const errorMessage = err?.message || '';
+          if (
+            errorMessage.includes('Cannot coerce') ||
+            errorMessage.includes('Target role belum di-set')
+          ) {
             setAnalysis(null);
             setAnalysisError(null);
           } else {
-            setAnalysisError(err?.message || 'Failed to fetch data');
+            setAnalysisError(errorMessage || 'Failed to fetch data');
           }
         } finally {
           setAnalysisLoading(false);
@@ -126,7 +130,7 @@ export default function Page() {
           <section className='space-y-4'>
             {/* Stats row Skeleton */}
             <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4'>
-              {[1, 2, 3, 4].map(i => (
+              {[1, 2, 3, 4].map((i) => (
                 <Skeleton key={i} className='h-32 w-full rounded-2xl' />
               ))}
             </div>
@@ -161,9 +165,9 @@ export default function Page() {
         </header>
 
         <section className='space-y-4'>
-          {/* Stats row */}
+          {/* Baris statistik angka-angka */}
           <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4'>
-            <div className='bg-linear-to-br from-66% from-gray-900 to-99% to-gray-700 rounded-2xl p-4 text-gray-100 flex flex-col gap-4 shadow-sm'>
+            <div className='bg-linear-to-br from-66% from-gray-900 to-99% to-gray-700 rounded-3xl p-4 text-gray-100 flex flex-col gap-4 shadow-sm'>
               <div className='size-9 bg-gray-900 text-gray-100 grid place-items-center rounded-md'>
                 <BookOpen />
               </div>
@@ -172,7 +176,7 @@ export default function Page() {
               </h3>
               <p className='text-gray-100/70'>Step roadmap</p>
             </div>
-            <div className='bg-gray-100 rounded-2xl p-4 flex flex-col gap-4 border border-gray-300 shadow-sm'>
+            <div className='bg-gray-100 rounded-3xl p-4 flex flex-col gap-4 border border-gray-300 shadow-sm'>
               <div className='size-9 bg-gray-900 text-gray-100 grid place-items-center rounded-md'>
                 <BookCopy />
               </div>
@@ -181,7 +185,7 @@ export default function Page() {
               </h3>
               <p className='text-gray-900/70'>Total Skill</p>
             </div>
-            <div className='bg-gray-100 rounded-2xl p-4 flex flex-col gap-4 border border-gray-300 shadow-sm'>
+            <div className='bg-gray-100 rounded-3xl p-4 flex flex-col gap-4 border border-gray-300 shadow-sm'>
               <div className='size-9 bg-gray-800 text-gray-100 grid place-items-center rounded-md'>
                 <BookOpenCheck />
               </div>
@@ -190,7 +194,7 @@ export default function Page() {
               </h3>
               <p className='text-gray-900/70'>Skill dikuasai</p>
             </div>
-            <div className='bg-gray-100 rounded-2xl p-4 flex flex-col gap-4 border border-gray-300 shadow-sm'>
+            <div className='bg-gray-100 rounded-3xl p-4 flex flex-col gap-4 border border-gray-300 shadow-sm'>
               <div className='size-9 bg-gray-500 text-gray-100 grid place-items-center rounded-md'>
                 <BookOpenText />
               </div>
@@ -201,10 +205,10 @@ export default function Page() {
             </div>
           </div>
 
-          {/* Profile + Analysis */}
+          {/* Bagian Profil & Grafik Analisis */}
           <div className='grid grid-cols-1 lg:grid-cols-5 gap-4'>
             {/* Profile card */}
-            <div className='lg:col-span-2 p-8 bg-gray-100 rounded-2xl grid grid-rows-1 md:grid-rows-2 border border-gray-300 shadow-sm'>
+            <div className='lg:col-span-2 p-4 bg-gray-100 rounded-3xl grid grid-rows-1 md:grid-rows-2 border border-gray-300 shadow-sm'>
               <div className='flex flex-col items-center gap-2 justify-center'>
                 <div className='p-4 bg-linear-to-br from-60% from-gray-900 to-100% to-gray-700 text-gray-100 size-15 text-2xl font-bold grid place-items-center rounded-2xl self-center'>
                   {user?.user_metadata?.full_name?.[0]}
@@ -241,7 +245,7 @@ export default function Page() {
             </div>
 
             {/* Analysis card */}
-            <div className='lg:col-span-3 bg-gray-100 rounded-2xl p-8 border border-gray-300 shadow-sm'>
+            <div className='lg:col-span-3 bg-gray-100 rounded-3xl p-4 border border-gray-300 shadow-sm'>
               <div className='flex flex-col gap-4'>
                 <div className='flex items-center justify-between'>
                   <div className='flex items-center gap-4'>
@@ -314,19 +318,27 @@ export default function Page() {
                     <div>Belum ada skill gap yang terdeteksi.</div>
                   )
                 ) : (
-                  <div>
-                    Jalankan analisis di halaman Analytics untuk melihat
-                    hasilnya di sini.
+                  <div className='text-center py-6'>
+                    <p className='text-sm text-gray-500 mb-3'>
+                      Jalankan analisis di halaman Analytics untuk melihat
+                      hasilnya di sini.
+                    </p>
+                    <Link
+                      href='/analytics'
+                      className='text-sm text-indigo-600 hover:underline'
+                    >
+                      Ke Analytics
+                    </Link>
                   </div>
                 )}
               </div>
             </div>
           </div>
 
-          {/* Skills + Roadmap */}
+          {/* List Skill & Roadmap Singkat */}
           <div className='grid grid-cols-1 lg:grid-cols-2 gap-4'>
             {/* Owned skills */}
-            <div className='bg-gray-100 p-8 rounded-2xl border border-gray-300 shadow-sm'>
+            <div className='bg-gray-100 p-4 rounded-3xl border border-gray-300 shadow-sm'>
               <div className='flex flex-col gap-4'>
                 <div className='flex items-center gap-4'>
                   <CheckCircle />
@@ -358,16 +370,24 @@ export default function Page() {
                       </li>
                     ))
                   ) : (
-                    <p className='text-sm text-gray-500'>
-                      Belum ada skill yang ditambahkan.
-                    </p>
+                    <div className='text-center py-6 col-span-2'>
+                      <p className='text-sm text-gray-500 mb-3'>
+                        Belum ada skill yang ditambahkan
+                      </p>
+                      <Link
+                        href='/profile'
+                        className='text-sm text-indigo-600 hover:underline'
+                      >
+                        Ke Profile
+                      </Link>
+                    </div>
                   )}
                 </ul>
               </div>
             </div>
 
             {/* Roadmap phases */}
-            <div className='bg-gray-100 p-8 rounded-2xl border border-gray-300 shadow-sm'>
+            <div className='bg-gray-100 p-4 rounded-3xl border border-gray-300 shadow-sm'>
               <div className='flex flex-col gap-4'>
                 <div className='flex items-center justify-between'>
                   <div className='flex items-center gap-4'>
@@ -421,7 +441,7 @@ export default function Page() {
                       href='/analytics'
                       className='text-sm text-indigo-600 hover:underline'
                     >
-                      Ke Analytics →
+                      Ke Analytics
                     </Link>
                   </div>
                 )}

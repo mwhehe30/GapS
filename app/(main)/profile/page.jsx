@@ -4,15 +4,17 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 import { useRouter } from 'next/navigation';
 import Skeleton from '@/components/Skeleton';
-import { 
-  User, 
-  Mail, 
-  Briefcase, 
-  Save, 
-  Loader2, 
-  CheckCircle, 
-  AlertCircle 
+import {
+  User,
+  Mail,
+  Briefcase,
+  Save,
+  Loader2,
+  CheckCircle,
+  AlertCircle,
 } from 'lucide-react';
+import { getSkills } from '@/lib/api';
+import SkillSelector from '@/components/SkillSelector';
 
 const ProfilePage = () => {
   const router = useRouter();
@@ -22,13 +24,22 @@ const ProfilePage = () => {
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState(null);
 
-  // Form states
+  // State buat urusan input form profil
   const [fullName, setFullName] = useState('');
   const [currentPosition, setCurrentPosition] = useState('');
 
+  // State buat manajemen skill user
+  const [allSkills, setAllSkills] = useState([]);
+  const [userSkillIds, setUserSkillIds] = useState([]);
+  const [showSkillSelector, setShowSkillSelector] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+
   useEffect(() => {
+    // Fungsi buat narik semua data user sekaligus pas awal buka
     const fetchUserData = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
 
       if (!user) {
         router.push('/signin');
@@ -38,7 +49,7 @@ const ProfilePage = () => {
       setUser(user);
       setFullName(user.user_metadata?.full_name || '');
 
-      // Fetch profile details
+      // Ambil detail info profil tambahan (posisi sekarang, dsb)
       const { data: profileData } = await supabase
         .from('profiles')
         .select('*')
@@ -50,6 +61,21 @@ const ProfilePage = () => {
         setCurrentPosition(profileData.current_position || '');
       }
 
+      // Ambil daftar ID skill yang udah dipilih user sebelumnya
+      const { data: userSkills } = await supabase
+        .from('user_skills')
+        .select('skill_id')
+        .eq('user_id', user.id);
+      setUserSkillIds(userSkills?.map((s) => s.skill_id) || []);
+
+      // Ambil daftar semua skill yang tersedia di sistem biar bisa dipilih user
+      try {
+        const skillsData = await getSkills();
+        setAllSkills(skillsData.skills || []);
+      } catch (err) {
+        console.error('Failed to fetch skills:', err);
+      }
+
       setLoading(false);
     };
 
@@ -57,6 +83,7 @@ const ProfilePage = () => {
   }, [router]);
 
   const handleSave = async (e) => {
+    // Fungsi buat nyimpen semua perubahan profil ke database
     e.preventDefault();
     setSaving(true);
     setMessage(null);
@@ -64,32 +91,63 @@ const ProfilePage = () => {
     try {
       // 1. Update Auth Metadata (Full Name)
       const { error: authError } = await supabase.auth.updateUser({
-        data: { full_name: fullName }
+        data: { full_name: fullName },
       });
 
       if (authError) throw authError;
 
       // 2. Update Profiles Table (Current Position)
-      const { error: profileError } = await supabase
-        .from('profiles')
-        .upsert({
-          id: user.id,
-          current_position: currentPosition,
-          updated_at: new Date().toISOString() // Optional: if you have this column
-        });
+      const { error: profileError } = await supabase.from('profiles').upsert({
+        id: user.id,
+        current_position: currentPosition,
+        updated_at: new Date().toISOString(), // Optional: if you have this column
+      });
 
       if (profileError) throw profileError;
 
       setMessage({ type: 'success', text: 'Profil berhasil diperbarui!' });
-      
-      // Auto-refresh user state in layout might be needed, but for now just local update
-      setUser({ ...user, user_metadata: { ...user.user_metadata, full_name: fullName } });
 
+      // Auto-refresh user state in layout might be needed, but for now just local update
+      setUser({
+        ...user,
+        user_metadata: { ...user.user_metadata, full_name: fullName },
+      });
     } catch (err) {
       console.error('Error updating profile:', err);
-      setMessage({ type: 'error', text: err.message || 'Gagal memperbarui profil' });
+      setMessage({
+        type: 'error',
+        text: err.message || 'Gagal memperbarui profil',
+      });
     } finally {
       setSaving(false);
+    }
+  };
+
+  const handleSkillToggle = async (skillId) => {
+    // Fungsi buat tambah/hapus skill dari profil user (toggle)
+    if (!user) return;
+
+    const isCurrentlyOwned = userSkillIds.includes(skillId);
+    const newUserSkillIds = isCurrentlyOwned
+      ? userSkillIds.filter((id) => id !== skillId)
+      : [...userSkillIds, skillId];
+    setUserSkillIds(newUserSkillIds);
+
+    try {
+      if (isCurrentlyOwned) {
+        await supabase
+          .from('user_skills')
+          .delete()
+          .eq('user_id', user.id)
+          .eq('skill_id', skillId);
+      } else {
+        await supabase
+          .from('user_skills')
+          .insert({ user_id: user.id, skill_id: skillId });
+      }
+    } catch (err) {
+      console.error('Failed to toggle skill:', err);
+      setUserSkillIds(userSkillIds); // rollback
     }
   };
 
@@ -103,22 +161,35 @@ const ProfilePage = () => {
   }
 
   return (
-    <div className='max-w-4xl mx-auto py-8 space-y-8'>
+    <div className='max-w-7xl mx-auto py-8 space-y-8'>
       <header className='space-y-2 text-center md:text-left'>
-        <h1 className='text-3xl md:text-5xl font-bold text-gray-900'>Profil Saya</h1>
-        <p className='text-xl text-gray-600'> Kelola informasi pribadi dan data profesional Anda </p>
+        <h1 className='text-3xl md:text-5xl font-bold text-gray-900'>
+          Profil Saya
+        </h1>
+        <p className='text-xl text-gray-600'>
+          {' '}
+          Kelola informasi pribadi dan data profesional Anda{' '}
+        </p>
       </header>
 
       {message && (
-        <div className={`p-4 rounded-xl flex items-center gap-3 animate-in fade-in slide-in-from-top-2 duration-300 ${
-          message.type === 'success' ? 'bg-green-50 border border-green-200 text-green-700' : 'bg-red-50 border border-red-200 text-red-700'
-        }`}>
-          {message.type === 'success' ? <CheckCircle className='w-5 h-5 shrink-0' /> : <AlertCircle className='w-5 h-5 shrink-0' />}
+        <div
+          className={`p-4 rounded-xl flex items-center gap-3 animate-in fade-in slide-in-from-top-2 duration-300 ${
+            message.type === 'success'
+              ? 'bg-green-50 border border-green-200 text-green-700'
+              : 'bg-red-50 border border-red-200 text-red-700'
+          }`}
+        >
+          {message.type === 'success' ? (
+            <CheckCircle className='w-5 h-5 shrink-0' />
+          ) : (
+            <AlertCircle className='w-5 h-5 shrink-0' />
+          )}
           {message.text}
         </div>
       )}
 
-      <div className='bg-gray-100 rounded-3xl p-8 md:p-12 shadow-sm border border-gray-200'>
+      <div className='bg-gray-100 rounded-3xl p-4 md:p-6 shadow-sm border border-gray-200'>
         <form onSubmit={handleSave} className='space-y-8'>
           <div className='grid grid-cols-1 md:grid-cols-2 gap-8'>
             {/* Full Name */}
@@ -202,15 +273,25 @@ const ProfilePage = () => {
         </form>
       </div>
 
+      {/* Skill Selection Section */}
+      <SkillSelector
+        allSkills={allSkills}
+        userSkillIds={userSkillIds}
+        onToggle={handleSkillToggle}
+      />
+
       {/* Info Card */}
-      <div className='p-6 bg-indigo-50 rounded-2xl border border-indigo-100 flex gap-4'>
+      <div className='p-4 bg-indigo-50 rounded-3xl border border-indigo-100 flex gap-4'>
         <div className='p-3 bg-indigo-100 rounded-xl shrink-0'>
           <AlertCircle className='w-6 h-6 text-indigo-600' />
         </div>
         <div>
-          <h3 className='font-bold text-indigo-900'>Mengapa melengkapi profil?</h3>
+          <h3 className='font-bold text-indigo-900'>
+            Mengapa melengkapi profil?
+          </h3>
           <p className='text-indigo-800/70 text-sm mt-1'>
-            Informasi pekerjaan saat ini digunakan untuk menganalisis gap skill Anda secara lebih akurat dalam fitur Smart Analytics.
+            Informasi pekerjaan saat ini digunakan untuk menganalisis gap skill
+            Anda secara lebih akurat dalam fitur Smart Analytics.
           </p>
         </div>
       </div>
