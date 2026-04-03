@@ -5,8 +5,10 @@ import { supabase } from '@/lib/supabase';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
+import { ArrowLeft } from 'lucide-react';
 
 function DecorPanel() {
+
   return (
     <div className='relative flex flex-col justify-between p-8 bg-[#e8ecef] rounded-3xl shadow-custom-card inverted-radius-kiri max-h-full text-right'>
       {/* Top text */}
@@ -105,6 +107,7 @@ export default function SignIn() {
       <div className='flex gap-8 w-full max-w-4xl items-stretch'>
         {/* Decor panel - left */}
         <div className='hidden md:flex flex-1'>
+          
           <DecorPanel />
         </div>
 
@@ -148,9 +151,9 @@ export default function SignIn() {
               required
               className='w-full px-4 py-3 rounded-2xl bg-[#8a9199] text-white placeholder-gray-200 outline-none focus:ring-2 focus:ring-gray-500 '
             />
-            <p className='text-xs text-gray-600 -mt-1 ml-1 cursor-pointer hover:underline'>
+            <Link href={"/lupa-kata-sandi"} className='text-xs text-gray-600 -mt-1 ml-1 cursor-pointer hover:underline'>
               Lupa Kata Sandi?
-            </p>
+            </Link>
 
             <button
               type='submit'
