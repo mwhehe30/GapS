@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import Skeleton from '@/components/Skeleton';
 import {
   User,
@@ -12,6 +13,7 @@ import {
   Loader2,
   CheckCircle,
   AlertCircle,
+  KeyRound,
 } from 'lucide-react';
 import { getSkills } from '@/lib/api';
 import SkillSelector from '@/components/SkillSelector';
@@ -162,13 +164,10 @@ const ProfilePage = () => {
 
   return (
     <div className='max-w-7xl mx-auto py-8 space-y-8'>
-      <header className='space-y-2 text-center md:text-left'>
-        <h1 className='text-3xl md:text-5xl font-bold text-gray-900'>
-          Profil Saya
-        </h1>
-        <p className='text-xl text-gray-600'>
-          {' '}
-          Kelola informasi pribadi dan data profesional Anda{' '}
+      <header className='space-y-2'>
+        <h1 className='text-3xl md:text-5xl'>Profile</h1>
+        <p className='text-lg md:text-2xl text-gray-900/70'>
+          Kelola informasi pribadi dan data profesional Anda
         </p>
       </header>
 
@@ -251,11 +250,18 @@ const ProfilePage = () => {
             </div>
           </div>
 
-          <div className='pt-4 flex justify-end'>
+          <div className='pt-4 flex justify-end flex-col md:flex-row gap-3'>
+            <Link
+              href='/reset-kata-sandi?from=profile'
+              className='flex items-center justify-center gap-2 px-6 py-4 bg-gray-100 text-gray-700 rounded-2xl font-bold text-base md:text-lg hover:bg-gray-200 transition-all border border-gray-200'
+            >
+              <KeyRound className='w-5 h-5' />
+              Ganti Password
+            </Link>
             <button
               type='submit'
               disabled={saving}
-              className='flex items-center justify-center gap-3 px-10 py-4 bg-gray-900 text-white rounded-2xl font-bold text-lg hover:bg-gray-800 transition-all hover:scale-[1.02] active:scale-[0.98] disabled:opacity-70 shadow-lg shadow-gray-200'
+              className='flex items-center justify-center gap-3 px-10 py-4 bg-gray-900 text-white rounded-2xl font-bold text-base md:text-lg hover:bg-gray-800 transition-all hover:scale-[1.02] active:scale-[0.98] disabled:opacity-70 shadow-lg shadow-gray-200'
             >
               {saving ? (
                 <>

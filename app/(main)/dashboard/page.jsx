@@ -158,10 +158,11 @@ export default function Page() {
     <div className='pb-4'>
       <div className='max-w-7xl mx-auto space-y-8'>
         {/* Header */}
-        <header>
-          <h1 className='text-3xl md:text-5xl'>
+        <header className='space-y-2'>
+          <h1 className='text-3xl md:text-5xl'>Dashboard</h1>
+          <p className='text-lg md:text-2xl text-gray-900/70'>
             Selamat datang, {user?.user_metadata?.full_name || 'User'}
-          </h1>
+          </p>
         </header>
 
         <section className='space-y-4'>
@@ -208,7 +209,7 @@ export default function Page() {
           {/* Bagian Profil & Grafik Analisis */}
           <div className='grid grid-cols-1 lg:grid-cols-5 gap-4'>
             {/* Profile card */}
-            <div className='lg:col-span-2 p-4 bg-gray-100 rounded-3xl grid grid-rows-1 md:grid-rows-2 border border-gray-300 shadow-sm'>
+            <div className='lg:col-span-2 p-4 md:px-8 bg-gray-100 rounded-3xl grid grid-rows-1 md:grid-rows-2 border border-gray-300 shadow-sm'>
               <div className='flex flex-col items-center gap-2 justify-center'>
                 <div className='p-4 bg-linear-to-br from-60% from-gray-900 to-100% to-gray-700 text-gray-100 size-15 text-2xl font-bold grid place-items-center rounded-2xl self-center'>
                   {user?.user_metadata?.full_name?.[0]}
@@ -257,7 +258,7 @@ export default function Page() {
                       </p>
                     </div>
                   </div>
-                  <Link href='/analytics' className='hover:underline'>
+                  <Link href='/analytics' className='hover:underline shrink-0'>
                     Lihat detail
                   </Link>
                 </div>
@@ -271,7 +272,7 @@ export default function Page() {
                         ? analysis.masteredSkills?.map((skill, i) => (
                             <li
                               key={skill.id}
-                              className='p-2 bg-gray-300 rounded-xl'
+                              className='p-2 bg-white border-2 border-gray-200 rounded-xl'
                             >
                               <div className='flex items-center justify-between gap-2'>
                                 <div className='flex items-center gap-2'>
@@ -288,9 +289,6 @@ export default function Page() {
                                     </p>
                                   </div>
                                 </div>
-                                <p className='text-gray-900/70 mr-2'>
-                                  sudah dipelajari
-                                </p>
                               </div>
                             </li>
                           ))
@@ -298,7 +296,7 @@ export default function Page() {
                       {analysis.gapSkills.map((skill, i) => (
                         <li
                           key={skill.id}
-                          className='p-2 bg-gray-300 rounded-xl'
+                          className='p-2 bg-white border-2 border-gray-200 rounded-xl'
                         >
                           <div className='flex items-center gap-2'>
                             <div className='size-11 rounded-lg bg-gray-900 grid place-items-center text-white shrink-0'>
@@ -354,7 +352,7 @@ export default function Page() {
                     uniqueSkills.map((skill) => (
                       <li
                         key={skill.id}
-                        className='p-2 bg-gray-300 rounded-xl flex items-center gap-3'
+                        className='p-2 bg-white border-2 border-gray-200 rounded-xl flex items-center gap-3'
                       >
                         <div className='size-11 rounded-lg bg-gray-900 grid place-items-center text-white shrink-0'>
                           <CheckCircle className='w-5 h-5 shrink-0' />
@@ -370,7 +368,7 @@ export default function Page() {
                       </li>
                     ))
                   ) : (
-                    <div className='text-center py-6 col-span-2'>
+                    <div className='text-center py-6 w-full'>
                       <p className='text-sm text-gray-500 mb-3'>
                         Belum ada skill yang ditambahkan
                       </p>
@@ -399,7 +397,7 @@ export default function Page() {
                       </p>
                     </div>
                   </div>
-                  <Link href='/roadmap' className='hover:underline'>
+                  <Link href='/roadmap' className='hover:underline shrink-0'>
                     Lihat detail
                   </Link>
                 </div>
@@ -409,7 +407,7 @@ export default function Page() {
                     {roadmapContent.phases.map((phase) => (
                       <li
                         key={phase.phase}
-                        className='flex items-center gap-3 p-2 bg-gray-300 rounded-xl'
+                        className='flex items-center gap-3 p-2 bg-white border-2 border-gray-200 rounded-xl'
                       >
                         <div className='size-11 rounded-lg bg-gray-900 grid place-items-center text-white shrink-0'>
                           {phase.phase}

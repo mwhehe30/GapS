@@ -23,6 +23,18 @@ export default function RootLayout({ children }) {
       if (!user) {
         router.push('/signin');
       } else {
+        // Cek apakah user sudah set current_position
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('current_position')
+          .eq('id', user.id)
+          .maybeSingle();
+
+        if (!profile?.current_position) {
+          router.push('/onboarding');
+          return;
+        }
+
         setUser(user);
       }
       setLoading(false);
@@ -37,7 +49,7 @@ export default function RootLayout({ children }) {
 
   const logout = async () => {
     // Hapus semua data simpanan lokal biar bersih
-    Object.keys(localStorage).forEach(key => {
+    Object.keys(localStorage).forEach((key) => {
       if (key.startsWith('gaps_')) {
         localStorage.removeItem(key);
       }
@@ -48,12 +60,12 @@ export default function RootLayout({ children }) {
 
   // Tampilin null/kosong dulu pas lagi nunggu status login
   if (loading) {
-    return null; 
+    return null;
   }
 
   return (
     <main className='bg-gray-200 min-h-screen'>
-      <header className='container mx-auto p-4 transition-colors duration-300 bg-transparent sticky top-0 z-50'>
+      <header className='container mx-auto p-4 transition-colors duration-300 bg-transparent top-0 z-50'>
         <nav className='flex items-center justify-between'>
           <Link href='/' className='text-2xl font-bold text-gray-900/70'>
             Gap<span className='text-gray-900'>S</span>
@@ -64,10 +76,11 @@ export default function RootLayout({ children }) {
               <li>
                 <Link
                   href='/dashboard'
-                  className={`px-3 py-3 rounded-xl transition-colors ${pathname === '/dashboard'
+                  className={`px-3 py-3 rounded-xl transition-colors ${
+                    pathname === '/dashboard'
                       ? 'bg-gray-200 font-semibold text-gray-900'
                       : 'hover:text-gray-900 text-gray-900/60'
-                    }`}
+                  }`}
                 >
                   Dashboard
                 </Link>
@@ -75,10 +88,11 @@ export default function RootLayout({ children }) {
               <li>
                 <Link
                   href='/analytics'
-                  className={`px-3 py-3 rounded-xl transition-colors ${pathname === '/analytics'
+                  className={`px-3 py-3 rounded-xl transition-colors ${
+                    pathname === '/analytics'
                       ? 'bg-gray-200 font-semibold text-gray-900'
                       : 'hover:text-gray-900 text-gray-900/60'
-                    }`}
+                  }`}
                 >
                   Analytics
                 </Link>
@@ -86,25 +100,27 @@ export default function RootLayout({ children }) {
               <li>
                 <Link
                   href='/roadmap'
-                  className={`px-3 py-3 rounded-xl transition-colors ${pathname === '/roadmap'
+                  className={`px-3 py-3 rounded-xl transition-colors ${
+                    pathname === '/roadmap'
                       ? 'bg-gray-200 font-semibold text-gray-900'
                       : 'hover:text-gray-900 text-gray-900/60'
-                    }`}
+                  }`}
                 >
                   Roadmap
                 </Link>
               </li>
-              <li>
+              {/* <li>
                 <Link
                   href='/profile'
-                  className={`px-3 py-3 rounded-xl transition-colors ${pathname === '/profile'
+                  className={`px-3 py-3 rounded-xl transition-colors ${
+                    pathname === '/profile'
                       ? 'bg-gray-200 font-semibold text-gray-900'
                       : 'hover:text-gray-900 text-gray-900/60'
-                    }`}
+                  }`}
                 >
                   Profile
                 </Link>
-              </li>
+              </li> */}
             </ul>
 
             <div className='relative'>
@@ -195,43 +211,47 @@ export default function RootLayout({ children }) {
             <Link
               href='/dashboard'
               onClick={() => setIsMenuOpen(false)}
-              className={`block px-4 py-3 rounded-xl transition-colors ${pathname === '/dashboard'
+              className={`block px-4 py-3 rounded-xl transition-colors ${
+                pathname === '/dashboard'
                   ? 'bg-gray-200 font-semibold text-gray-900'
                   : 'hover:bg-gray-200 text-gray-900/60'
-                }`}
+              }`}
             >
               Dashboard
             </Link>
             <Link
               href='/analytics'
               onClick={() => setIsMenuOpen(false)}
-              className={`block px-4 py-3 rounded-xl transition-colors ${pathname === '/analytics'
+              className={`block px-4 py-3 rounded-xl transition-colors ${
+                pathname === '/analytics'
                   ? 'bg-gray-200 font-semibold text-gray-900'
                   : 'hover:bg-gray-200 text-gray-900/60'
-                }`}
+              }`}
             >
               Analytics
             </Link>
             <Link
               href='/roadmap'
               onClick={() => setIsMenuOpen(false)}
-              className={`block px-4 py-3 rounded-xl transition-colors ${pathname === '/roadmap'
+              className={`block px-4 py-3 rounded-xl transition-colors ${
+                pathname === '/roadmap'
                   ? 'bg-gray-200 font-semibold text-gray-900'
                   : 'hover:bg-gray-200 text-gray-900/60'
-                }`}
+              }`}
             >
               Roadmap
             </Link>
-            <Link
+            {/* <Link
               href='/profile'
               onClick={() => setIsMenuOpen(false)}
-              className={`block px-4 py-3 rounded-xl transition-colors ${pathname === '/profile'
+              className={`block px-4 py-3 rounded-xl transition-colors ${
+                pathname === '/profile'
                   ? 'bg-gray-200 font-semibold text-gray-900'
                   : 'hover:bg-gray-200 text-gray-900/60'
-                }`}
+              }`}
             >
               Profile
-            </Link>
+            </Link> */}
             <button
               onClick={logout}
               className='w-full text-left px-4 py-3 rounded-xl bg-red-100 text-red-600 mt-4 flex items-center gap-2'

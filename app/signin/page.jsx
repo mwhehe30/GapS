@@ -104,6 +104,10 @@ export default function SignIn() {
 
   return (
     <div className='min-h-screen bg-[#dde3e8] flex items-center justify-center p-6'>
+      <Link href='/' className='absolute top-6 left-6 flex items-center gap-1.5 text-sm text-gray-600 hover:text-gray-900 transition-colors'>
+        <ArrowLeft size={16} />
+        Beranda
+      </Link>
       <div className='flex gap-8 w-full max-w-4xl items-stretch'>
         {/* Decor panel - left */}
         <div className='hidden md:flex flex-1'>

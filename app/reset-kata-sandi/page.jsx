@@ -16,6 +16,7 @@ export default function ResetKataSandiPage() {
   const [error, setError] = useState(null)
   const [success, setSuccess] = useState(false)
   const [verifying, setVerifying] = useState(true)
+  const [fromProfile, setFromProfile] = useState(false)
   const [passwords, setPasswords] = useState({
     new: '',
     confirm: '',
@@ -24,20 +25,27 @@ export default function ResetKataSandiPage() {
   useEffect(() => {
     const verifySession = async () => {
       const { data: { session } } = await supabase.auth.getSession()
-      
-      if (!session) {
-        const hashParams = new URLSearchParams(window.location.hash.substring(1))
-        const accessToken = hashParams.get('access_token')
-        
-        if (!accessToken) {
-          router.push('/signin')
-          return
-        }
+
+      if (session) {
+        // User sudah login (akses dari profile)
+        const params = new URLSearchParams(window.location.search)
+        setFromProfile(params.get('from') === 'profile')
+        setVerifying(false)
+        return
       }
-      
+
+      // Tidak ada session, cek token dari email reset
+      const hashParams = new URLSearchParams(window.location.hash.substring(1))
+      const accessToken = hashParams.get('access_token')
+
+      if (!accessToken) {
+        router.push('/signin')
+        return
+      }
+
       setVerifying(false)
     }
-    
+
     verifySession()
   }, [router])
 
@@ -72,7 +80,7 @@ export default function ResetKataSandiPage() {
     setLoading(false)
 
     setTimeout(() => {
-      router.push('/signin')
+      router.push(fromProfile ? '/profile' : '/signin')
     }, 3000)
   }
 
@@ -104,7 +112,9 @@ export default function ResetKataSandiPage() {
             </h1>
             <p className="text-sm text-slate-600 mt-1">
               {success
-                ? 'Kata sandi Anda sudah diperbarui. Mengalihkan ke login...'
+                ? fromProfile
+                  ? 'Kata sandi Anda sudah diperbarui. Mengalihkan ke profil...'
+                  : 'Kata sandi Anda sudah diperbarui. Mengalihkan ke login...'
                 : 'Masukkan Kata sandi baru untuk akun Anda'}
             </p>
           </div>
@@ -201,9 +211,9 @@ export default function ResetKataSandiPage() {
           </div>
 
           <div className="p-6 border-slate-200 text-center">
-            <Link href="/signin" className="inline-flex items-center text-sm text-[#212529] hover:underline gap-1">
+            <Link href={fromProfile ? "/profile" : "/signin"} className="inline-flex items-center text-sm text-[#212529] hover:underline gap-1">
               <ArrowLeft className="size-4" />
-              Kembali ke Login
+              {fromProfile ? 'Kembali ke Profil' : 'Kembali ke Login'}
             </Link>
           </div>
         </div>

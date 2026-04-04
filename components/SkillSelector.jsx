@@ -16,12 +16,12 @@ const SkillSelector = ({
   onToggle, 
   title = "Pilih Skill yang Kamu Miliki",
   description,
-  initiallyOpen = false
+  initiallyOpen = false,
+  columns = 'default'
 }) => {
   const [showSkillSelector, setShowSkillSelector] = useState(initiallyOpen);
   const [searchQuery, setSearchQuery] = useState('');
 
-  // Filter skill berdasarkan ketikan user di kotak pencarian
   const filteredSkills = useMemo(() => {
     return allSkills.filter(
       (skill) =>
@@ -30,7 +30,6 @@ const SkillSelector = ({
     );
   }, [allSkills, searchQuery]);
 
-  // Kelompokkan skill berdasarkan kategori biar lebih rapi di UI
   const skillsByCategory = useMemo(() => {
     return filteredSkills.reduce((acc, skill) => {
       const category = skill.category || 'Lainnya';
@@ -69,7 +68,6 @@ const SkillSelector = ({
 
       {showSkillSelector && (
         <div className='p-4 bg-gray-100 border-t border-gray-200 animate-in slide-in-from-top-4 duration-300'>
-          {/* Kotak buat nyari skill atau kategori */}
           <div className='relative mb-8'>
             <Search className='absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5' />
             <input
@@ -81,7 +79,6 @@ const SkillSelector = ({
             />
           </div>
 
-          {/* Daftar pilihan skill per kategori */}
           <div className='space-y-10 max-h-[400px] overflow-y-auto pr-4 custom-scrollbar'>
             {Object.keys(skillsByCategory).length > 0 ? (
               Object.entries(skillsByCategory).map(([category, skills]) => (
@@ -89,7 +86,11 @@ const SkillSelector = ({
                   <h3 className='text-sm font-bold text-indigo-600 uppercase tracking-widest px-1'>
                     {formatCategory(category)}
                   </h3>
-                  <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-3'>
+                  <div className={`grid gap-3 ${
+                    columns === 'compact'
+                      ? 'grid-cols-1 sm:grid-cols-2'
+                      : 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5'
+                  }`}>
                     {skills.map((skill) => {
                       const isSelected = userSkillIds.includes(skill.id);
                       return (

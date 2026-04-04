@@ -259,10 +259,10 @@ const AnalyticsPage = () => {
 
   return (
     <div className='max-w-7xl pb-4 mx-auto space-y-4'>
-      {JSON.stringify(analysis)}
+      {/* {JSON.stringify(analysis)} */}
       <header className='space-y-2'>
         <h1 className='text-3xl md:text-5xl'>Skill Gap Analysis</h1>
-        <p className='text-2xl text-gray-900/70'>
+        <p className='text-lg md:text-2xl text-gray-900/70'>
           Lihat perbandingan skill antara profil anda dan posisi target
         </p>
       </header>
@@ -477,13 +477,13 @@ const AnalyticsPage = () => {
                             key={skill.id}
                             className='flex items-center justify-between gap-3 p-3 bg-white border border-gray-200 rounded-2xl hover:shadow-md transition-shadow group'
                           >
-                            <div className='flex items-center gap-3'>
+                            <div className='flex items-center gap-3 truncate'>
                               <Target className='w-5 h-5 text-red-600 shrink-0' />
                               <div>
-                                <div className='font-medium text-gray-900'>
+                                <div className='font-medium text-gray-900 truncate'>
                                   {skill.name}
                                 </div>
-                                <div className='text-xs text-gray-500 uppercase'>
+                                <div className='text-xs text-gray-500 uppercase truncate'>
                                   {formatCategory(skill.category)}
                                 </div>
                               </div>
@@ -491,7 +491,7 @@ const AnalyticsPage = () => {
                             <button
                               onClick={() => handleToggleSkill(skill.id, false)}
                               disabled={togglingSkillId === skill.id}
-                              className='flex items-center gap-2 px-3 py-2 bg-gray-900 text-white text-xs font-bold rounded-xl hover:bg-gray-800 transition-all shadow-sm disabled:opacity-50 disabled:cursor-not-allowed min-w-[90px] justify-center'
+                              className='flex items-center gap-2 px-3 py-2 bg-gray-900 text-white shrink-0 text-xs font-bold rounded-xl hover:bg-gray-800 transition-all shadow-sm disabled:opacity-50 disabled:cursor-not-allowed min-w-[90px] justify-center'
                             >
                               {togglingSkillId === skill.id ? (
                                 <Loader2 className='w-3 h-3 animate-spin' />

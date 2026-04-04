@@ -3,17 +3,9 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 import { useRouter } from 'next/navigation';
-import {
-  Briefcase,
-  ArrowRight,
-  CheckCircle,
-  Loader2,
-  ChevronRight,
-  Sparkles
-} from 'lucide-react';
+import { Briefcase, CheckCircle, Loader2, ChevronRight } from 'lucide-react';
 import { getSkills } from '@/lib/api';
 import SkillSelector from '@/components/SkillSelector';
-import Skeleton from '@/components/Skeleton';
 
 export default function OnboardingPage() {
   const router = useRouter();
@@ -22,7 +14,6 @@ export default function OnboardingPage() {
   const [saving, setSaving] = useState(false);
   const [user, setUser] = useState(null);
 
-  // Form states
   const [currentPosition, setCurrentPosition] = useState('');
   const [allSkills, setAllSkills] = useState([]);
   const [userSkillIds, setUserSkillIds] = useState([]);
@@ -30,24 +21,17 @@ export default function OnboardingPage() {
   useEffect(() => {
     const init = async () => {
       const { data: { user } } = await supabase.auth.getUser();
-      if (!user) {
-        router.push('/signin');
-        return;
-      }
+      if (!user) { router.push('/signin'); return; }
       setUser(user);
 
-      // Check if profile already exists to pre-fill
       const { data: profile } = await supabase
         .from('profiles')
         .select('current_position')
         .eq('id', user.id)
         .maybeSingle();
 
-      if (profile?.current_position) {
-        setCurrentPosition(profile.current_position);
-      }
+      if (profile?.current_position) { router.push('/dashboard'); return; }
 
-      // Fetch all skills for step 2
       try {
         const skillsData = await getSkills();
         setAllSkills(skillsData.skills || []);
@@ -63,13 +47,12 @@ export default function OnboardingPage() {
   const handleNextStep = async (e) => {
     if (e) e.preventDefault();
     if (!currentPosition.trim()) return;
-
     setSaving(true);
     try {
       await supabase.from('profiles').upsert({
         id: user.id,
         current_position: currentPosition,
-        updated_at: new Date().toISOString()
+        updated_at: new Date().toISOString(),
       });
       setStep(2);
     } catch (err) {
@@ -85,7 +68,6 @@ export default function OnboardingPage() {
       ? userSkillIds.filter((id) => id !== skillId)
       : [...userSkillIds, skillId];
     setUserSkillIds(newUserSkillIds);
-
     try {
       if (isCurrentlyOwned) {
         await supabase.from('user_skills').delete().eq('user_id', user.id).eq('skill_id', skillId);
@@ -94,122 +76,102 @@ export default function OnboardingPage() {
       }
     } catch (err) {
       console.error('Failed to toggle skill:', err);
-      setUserSkillIds(userSkillIds); // rollback
+      setUserSkillIds(userSkillIds);
     }
   };
 
-  const handleFinish = () => {
-    router.push('/dashboard');
-  };
+  const handleFinish = () => router.push('/dashboard');
 
   if (loading) {
     return (
-      <div className="max-w-3xl mx-auto py-20 px-6">
-        <Skeleton className="h-12 w-3/4 mb-4 rounded-xl" />
-        <Skeleton className="h-6 w-1/2 mb-12 rounded-lg" />
-        <Skeleton className="h-64 w-full rounded-3xl" />
+      <div className='min-h-screen bg-[#dde3e8] flex items-center justify-center'>
+        <div className='w-8 h-8 border-4 border-gray-400 border-t-gray-800 rounded-full animate-spin' />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center py-12 px-6">
-      <div className="w-full max-w-3xl space-y-8 animate-in fade-in zoom-in-95 duration-500">
+    <div className='min-h-screen bg-[#dde3e8] flex items-center justify-center p-6'>
+      <div className={`flex-1 flex flex-col justify-center items-center w-full mx-auto ${step === 1 ? 'max-w-sm' : 'max-w-3xl'}`}>
 
-        {/* Progress Header */}
-        <div className="flex items-center justify-center gap-4 mb-2">
-          <div className={`h-2.5 w-16 rounded-full transition-all duration-500 ${step >= 1 ? 'bg-gray-900' : 'bg-gray-300'}`} />
-          <div className={`h-2.5 w-16 rounded-full transition-all duration-500 ${step >= 2 ? 'bg-gray-900' : 'bg-gray-300'}`} />
+        {/* Progress dots */}
+        <div className='flex items-center gap-3 mb-8'>
+          <div className={`h-2 w-12 rounded-full ${step >= 1 ? 'bg-gray-800' : 'bg-gray-400'}`} />
+          <div className={`h-2 w-12 rounded-full ${step >= 2 ? 'bg-gray-800' : 'bg-gray-400'}`} />
         </div>
 
-        <div className="text-center space-y-3">
-          <div className="inline-flex p-3 bg-gray-100 rounded-3xl shadow-sm border border-gray-200 mb-2">
-            <Sparkles className="w-6 h-6 text-indigo-600" />
-          </div>
-          <h1 className="text-3xl md:text-4xl font-black text-gray-900 italic">
-            {step === 1 ? "Selamat Datang di GapS!" : "Satu Langkah Lagi..."}
-          </h1>
-          <p className="text-lg text-gray-600 max-w-md mx-auto">
-            {step === 1
-              ? "Mari mulai dengan melengkapi informasi profesional Anda untuk hasil analisis yang akurat."
-              : "Pilih skill yang sudah Anda kuasai. Anda bisa melewati bagian ini jika mau."}
-          </p>
-        </div>
+        <h1 className='text-4xl font-black text-gray-900 mb-1 text-center'>
+          {step === 1 ? 'Selamat Datang!' : 'Satu Langkah Lagi'}
+        </h1>
+        <p className='text-gray-500 text-sm mb-8 text-center'>
+          {step === 1
+            ? 'Ceritakan posisi kamu saat ini untuk memulai analisis.'
+            : 'Pilih skill yang sudah kamu kuasai. Bisa dilewati jika mau.'}
+        </p>
 
-        <div className="bg-gray-100 rounded-3xl p-6 md:p-8 shadow-xl border border-gray-200 relative overflow-hidden">
-          {/* Decorative background element */}
-          <div className="absolute -top-24 -right-24 w-48 h-48 bg-white/50 rounded-full blur-3xl opacity-30" />
-
-          {step === 1 ? (
-            <form onSubmit={handleNextStep} className="space-y-8 relative">
-              <div className="space-y-4">
-                <label className="text-sm font-bold text-gray-400 uppercase tracking-widest ml-1">
-                  Apa pekerjaan atau posisi Anda saat ini?
-                </label>
-                <div className="relative group">
-                  <div className="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none">
-                    <Briefcase className="w-6 h-6 text-gray-400 group-focus-within:text-indigo-500 transition-colors" />
-                  </div>
-                  <input
-                    type="text"
-                    autoFocus
-                    value={currentPosition}
-                    onChange={(e) => setCurrentPosition(e.target.value)}
-                    className="w-full pl-14 pr-6 py-4 bg-white border-2 border-gray-200 rounded-2xl focus:outline-none focus:ring-4 focus:ring-indigo-100 focus:border-indigo-500 transition-all text-xl font-semibold text-gray-900 placeholder:text-gray-300 shadow-sm"
-                    placeholder="Contoh: Junior Web Developer"
-                    required
-                  />
-                </div>
+        {step === 1 ? (
+          <form onSubmit={handleNextStep} className='flex flex-col gap-4 w-full'>
+            <div className='relative'>
+              <div className='absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none'>
+                <Briefcase className='w-5 h-5 text-gray-300' />
               </div>
-
-              <button
-                type="submit"
-                disabled={saving || !currentPosition.trim()}
-                className="w-full py-5 bg-gray-900 text-white rounded-2xl font-bold text-xl hover:bg-gray-800 transition-all hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 flex items-center justify-center gap-3 shadow-xl"
-              >
-                {saving ? (
-                  <Loader2 className="w-6 h-6 animate-spin" />
-                ) : (
-                  <>
-                    Lanjut
-                    <ChevronRight className="w-6 h-6" />
-                  </>
-                )}
-              </button>
-            </form>
-          ) : (
-            <div className="space-y-8 relative">
-              <SkillSelector
-                allSkills={allSkills}
-                userSkillIds={userSkillIds}
-                onToggle={handleSkillToggle}
-                title="Pilih Skill Anda"
-                description="Agar kami bisa menganalisis gap skill Anda dengan tepat"
-                initiallyOpen={true}
+              <input
+                type='text'
+                autoFocus
+                value={currentPosition}
+                onChange={(e) => setCurrentPosition(e.target.value)}
+                placeholder='Contoh: Junior Web Developer'
+                required
+                className='w-full pl-12 pr-4 py-3 rounded-2xl bg-[#8a9199] text-white placeholder-gray-200 outline-none focus:ring-2 focus:ring-gray-500'
               />
-
-              <div className="flex flex-col sm:flex-row gap-4">
-                <button
-                  onClick={handleFinish}
-                  className="flex-1 py-5 bg-gray-900 text-white rounded-2xl font-bold text-xl hover:bg-gray-800 transition-all hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-3 shadow-xl order-1 sm:order-2"
-                >
-                  Mulai Sekarang
-                  <CheckCircle className="w-6 h-6" />
-                </button>
-
-                <button
-                  onClick={handleFinish}
-                  className="flex-1 py-5 bg-gray-100 text-gray-500 rounded-2xl font-bold text-xl hover:bg-gray-200 transition-all flex items-center justify-center gap-3 order-2 sm:order-1"
-                >
-                  Lewati & Selesai
-                </button>
-              </div>
             </div>
-          )}
-        </div>
 
-        <p className="text-center text-gray-400 text-sm italic">
-          Data Anda aman dan dapat diubah kapan saja di menu profil.
+            <button
+              type='submit'
+              disabled={saving || !currentPosition.trim()}
+              className='w-full py-3 rounded-2xl bg-[#c8cdd2] text-gray-800 font-medium hover:bg-[#b8bec4] transition-colors disabled:opacity-60 flex items-center justify-center gap-2'
+            >
+              {saving ? (
+                <Loader2 className='w-4 h-4 animate-spin' />
+              ) : (
+                <>
+                  Lanjut
+                  <ChevronRight className='w-4 h-4' />
+                </>
+              )}
+            </button>
+          </form>
+        ) : (
+          <div className='flex flex-col gap-4 w-full'>
+            <SkillSelector
+              allSkills={allSkills}
+              userSkillIds={userSkillIds}
+              onToggle={handleSkillToggle}
+              title='Pilih Skill Anda'
+              description='Agar kami bisa menganalisis gap skill Anda dengan tepat'
+              initiallyOpen={true}
+              columns='compact'
+            />
+
+            <button
+              onClick={handleFinish}
+              className='w-full py-3 rounded-2xl bg-[#c8cdd2] text-gray-800 font-medium hover:bg-[#b8bec4] transition-colors flex items-center justify-center gap-2'
+            >
+              Mulai Sekarang
+              <CheckCircle className='w-4 h-4' />
+            </button>
+
+            <button
+              onClick={handleFinish}
+              className='w-full py-3 rounded-2xl text-gray-500 text-sm hover:text-gray-700 transition-colors'
+            >
+              Lewati & Selesai
+            </button>
+          </div>
+        )}
+
+        <p className='text-xs text-gray-400 mt-6 text-center'>
+          Data kamu aman dan bisa diubah kapan saja di menu profil.
         </p>
       </div>
     </div>

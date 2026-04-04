@@ -1,153 +1,117 @@
-'use client'
+'use client';
 
-import { useState } from 'react'
-import Link from 'next/link'
-import { supabase } from '@/lib/supabase'  
-import { 
-  Mail,
-  CheckCircle,
-  Send,
-  ArrowLeft
-} from 'lucide-react'
+import { useState } from 'react';
+import Link from 'next/link';
+import { supabase } from '@/lib/supabase';
+import { Mail, CheckCircle, Send, ArrowLeft, Loader2 } from 'lucide-react';
 
 export default function LupaKataSandiPage() {
-  const [email, setEmail] = useState('')
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState(null)
-  const [success, setSuccess] = useState(false)
+  const [email, setEmail] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [success, setSuccess] = useState(false);
 
   const handleSubmit = async (e) => {
-    e.preventDefault()
-    setLoading(true)
-    setError(null)
+    e.preventDefault();
+    setLoading(true);
+    setError(null);
 
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
       redirectTo: `${window.location.origin}/reset-kata-sandi`,
-    })
+    });
 
     if (error) {
-      setError(error.message)
-      setLoading(false)
-      return
+      setError(error.message);
+      setLoading(false);
+      return;
     }
 
-    setSuccess(true)
-    setLoading(false)
-  }
+    setSuccess(true);
+    setLoading(false);
+  };
 
   return (
-    <div className="min-h-screen bg-linear-to-b from-slate-50 to-white flex items-center justify-center p-4">
-      <div className="w-full max-w-md">
-        <Link
-          href="/signin"
-          className="inline-flex items-center text-sm text-slate-600 hover:text-slate-900 mb-8"
-        >
-          <ArrowLeft className='size-5' />
-          Kembali ke Login
-        </Link>
+    <div className='min-h-screen bg-[#dde3e8] flex items-center justify-center p-6'>
+      <Link
+        href='/signin'
+        className='absolute top-6 left-6 flex items-center gap-1.5 text-sm text-gray-600 hover:text-gray-900 transition-colors'
+      >
+        <ArrowLeft size={16} />
+        Kembali ke Login
+      </Link>
 
-        <div className="bg-white rounded-2xl shadow-lg border border-slate-200 overflow-hidden">
-          <div className="p-6 border-slate-200 text-center">
-            <div className="mx-auto w-16 h-16 bg-[#212529]/30 rounded-full flex items-center justify-center mb-4">
-              {success ? (
-                <CheckCircle className="w-8 h-8 text-white" />
-              ) : (
-                <Mail className="w-8 h-8 text-white" />
-              )}
-            </div>
-            <h1 className="text-2xl font-bold text-slate-900">
-              {success ? 'Cek Email Anda' : 'Lupa Kata Sandi?'}
-            </h1>
-            <p className="text-sm text-slate-600 mt-1">
-              {success
-                ? 'Kami sudah mengirim link reset kata sandi ke email Anda'
-                : 'Masukkan email Anda, kami akan kirim link untuk reset kata sandi'}
-            </p>
-          </div>
+      <div className='flex-1 flex flex-col justify-center items-center w-full max-w-sm mx-auto'>
+        {/* Icon */}
+        <div className='w-16 h-16 bg-[#8a9199] rounded-full flex items-center justify-center mb-6'>
+          {success ? (
+            <CheckCircle className='w-8 h-8 text-white' />
+          ) : (
+            <Mail className='w-8 h-8 text-white' />
+          )}
+        </div>
 
-          <div className="p-6">
-            {!success ? (
-              <form onSubmit={handleSubmit} className="space-y-4">
-                {error && (
-                  <div className="bg-red-50 border border-red-200 rounded-lg p-3">
-                    <p className="text-sm text-red-700">{error}</p>
-                  </div>
-                )}
+        <h1 className='text-4xl font-black text-gray-900 mb-1 text-center'>
+          {success ? 'Cek Email Anda' : 'Lupa Kata Sandi?'}
+        </h1>
+        <p className='text-gray-500 text-sm mb-8 text-center'>
+          {success
+            ? `Link reset telah dikirim ke ${email}`
+            : 'Masukkan email Anda, kami akan kirim link untuk reset kata sandi.'}
+        </p>
 
-                <div className="space-y-2">
-                  <label htmlFor="email" className="text-sm font-medium text-slate-700">
-                    Email
-                  </label>
-                  <div className="relative">
-                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                      <svg className="h-5 w-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                      </svg>
-                    </div>
-                    <input
-                      id="email"
-                      type="email"
-                      className="w-full pl-10 pr-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#212529]/80 focus:border-transparent"
-                      placeholder="nama@email.com"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      required
-                    />
-                  </div>
-                </div>
-
-                <button
-                  type="submit"
-                  disabled={loading}
-                  className="w-full bg-[#212529]/80 hover:bg-[#212529]/90 text-white font-medium py-2 px-4 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 mt-5 cursor-pointer"
-                >
-                  {loading ? (
-                    <>
-                      <svg className="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                      </svg>
-                      Mengirim...
-                    </>
-                  ) : (
-                    <>
-                      Kirim Link Reset
-                      <Send className="w-4 h-4" />
-                    </>
-                  )}
-                </button>
-              </form>
-            ) : (
-              <div className="space-y-4">
-                <div className="bg-[#212529]/10 border border-[#212529]/40 rounded-lg p-3">
-                  <p className="text-sm text-[#212529] text-center">
-                    Link reset kata sandi telah dikirim ke <strong>{email}</strong>
-                  </p>
-                </div>
-
-                <div className="bg-[#212529]/10 rounded-lg p-4">
-                  <p className="text-sm text-[#212529]">
-                    Tidak menerima email? Cek folder spam atau
-                    <button
-                      onClick={handleSubmit}
-                      disabled={loading}
-                      className="underline font-medium ml-1 hover:text-blue-900"
-                    >
-                      kirim ulang
-                    </button>
-                  </p>
-                </div>
+        {!success ? (
+          <form onSubmit={handleSubmit} className='flex flex-col gap-4 w-full'>
+            {error && (
+              <div className='px-4 py-3 rounded-2xl bg-red-400/20 text-red-800 text-sm'>
+                {error}
               </div>
             )}
-          </div>
 
-          <div className="p-6 border-slate-200 text-center">
-            <Link href="/masuk" className="text-sm text-[#212529] cursor-pointer hover:underline">
-              Ingat kata sandi? Login
-            </Link>
+            <input
+              type='email'
+              placeholder='Email'
+              required
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className='w-full px-4 py-3 rounded-2xl bg-[#8a9199] text-white placeholder-gray-200 outline-none focus:ring-2 focus:ring-gray-500'
+            />
+
+            <button
+              type='submit'
+              disabled={loading}
+              className='w-full py-3 rounded-2xl bg-[#c8cdd2] text-gray-800 font-medium hover:bg-[#b8bec4] transition-colors disabled:opacity-60 flex items-center justify-center gap-2'
+            >
+              {loading ? (
+                <Loader2 className='w-4 h-4 animate-spin' />
+              ) : (
+                <>
+                  Kirim Link Reset
+                  <Send className='w-4 h-4' />
+                </>
+              )}
+            </button>
+          </form>
+        ) : (
+          <div className='w-full flex flex-col gap-3'>
+            <div className='px-4 py-3 rounded-2xl bg-[#8a9199]/20 text-gray-700 text-sm text-center'>
+              Tidak menerima email? Cek folder spam atau{' '}
+              <button
+                onClick={() => setSuccess(false)}
+                className='underline font-medium hover:text-gray-900'
+              >
+                coba lagi
+              </button>
+            </div>
           </div>
-        </div>
+        )}
+
+        <p className='text-xs text-gray-500 mt-6'>
+          Ingat kata sandi?{' '}
+          <Link href='/signin' className='hover:underline text-gray-700 font-medium'>
+            Login
+          </Link>
+        </p>
       </div>
     </div>
-  )
+  );
 }
