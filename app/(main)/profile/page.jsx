@@ -287,15 +287,15 @@ const ProfilePage = () => {
       />
 
       {/* Info Card */}
-      <div className='p-4 bg-indigo-50 rounded-3xl border border-indigo-100 flex gap-4'>
-        <div className='p-3 bg-indigo-100 rounded-xl shrink-0'>
-          <AlertCircle className='w-6 h-6 text-indigo-600' />
+      <div className='p-4 bg-[#212529]/5 rounded-3xl border border-indigo-100 flex gap-4'>
+        <div className='p-3 bg-[#212529]/10 rounded-xl shrink-0'>
+          <AlertCircle className='w-6 h-6 text-gray-600' />
         </div>
         <div>
-          <h3 className='font-bold text-indigo-900'>
+          <h3 className='font-bold text-[#212529]/80'>
             Mengapa melengkapi profil?
           </h3>
-          <p className='text-indigo-800/70 text-sm mt-1'>
+          <p className='text-[#212529]/60 text-sm mt-1'>
             Informasi pekerjaan saat ini digunakan untuk menganalisis gap skill
             Anda secara lebih akurat dalam fitur Smart Analytics.
           </p>

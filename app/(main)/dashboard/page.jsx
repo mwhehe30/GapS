@@ -323,7 +323,7 @@ export default function Page() {
                     </p>
                     <Link
                       href='/analytics'
-                      className='text-sm text-indigo-600 hover:underline'
+                      className='text-sm text-gray-600 hover:underline'
                     >
                       Ke Analytics
                     </Link>
@@ -374,7 +374,7 @@ export default function Page() {
                       </p>
                       <Link
                         href='/profile'
-                        className='text-sm text-indigo-600 hover:underline'
+                        className='text-sm text-gray-600 hover:underline'
                       >
                         Ke Profile
                       </Link>
@@ -437,7 +437,7 @@ export default function Page() {
                     </p>
                     <Link
                       href='/analytics'
-                      className='text-sm text-indigo-600 hover:underline'
+                      className='text-sm text-gray-600 hover:underline'
                     >
                       Ke Analytics
                     </Link>

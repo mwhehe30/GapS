@@ -81,7 +81,7 @@ export default function Navbar() {
                 </Link>
                 <button
                   onClick={logout}
-                  className='px-4 py-2 bg-red-500 text-white rounded-md'
+                  className='px-4 py-2 bg-red-500 text-white rounded-md cursor-pointer'
                 >
                   Logout
                 </button>
@@ -104,7 +104,7 @@ export default function Navbar() {
 
           {/* Mobile hamburger */}
           <button
-            className='md:hidden p-2 rounded-xl hover:bg-gray-200/50 transition-colors'
+            className='md:hidden p-2 rounded-xl hover:bg-gray-200/50 transition-colors cursor-pointer'
             onClick={() => setMenuOpen(!menuOpen)}
             aria-label='Toggle menu'
           >
@@ -139,7 +139,7 @@ export default function Navbar() {
                 </Link>
                 <button
                   onClick={() => { logout(); setMenuOpen(false); }}
-                  className='px-4 py-2 bg-red-500 text-white rounded-md text-left'
+                  className='px-4 py-2 bg-red-500 text-white rounded-md text-left cursor-pointer'
                 >
                   Logout
                 </button>

@@ -128,7 +128,7 @@ export default function RootLayout({ children }) {
                 onClick={toggleUserModal}
                 className='p-2 bg-gray-100 rounded-2xl'
               >
-                <div className='p-2 bg-gray-100 hover:bg-gray-200 rounded-xl'>
+                <div className='p-2 bg-gray-100 hover:bg-gray-200 rounded-xl cursor-pointer'>
                   <User size={20} />
                 </div>
               </button>
@@ -172,7 +172,7 @@ export default function RootLayout({ children }) {
                       </Link>
                       <button
                         onClick={logout}
-                        className='w-full flex items-center gap-2 px-4 py-3 rounded-lg hover:bg-red-50 text-red-600 transition-colors text-sm font-medium'
+                        className='w-full flex items-center gap-2 px-4 py-3 rounded-lg hover:bg-red-50 text-red-600 transition-colors text-sm font-medium cursor-pointer'
                       >
                         <LogOut size={18} />
                         Logout
@@ -184,7 +184,7 @@ export default function RootLayout({ children }) {
             </div>
 
             <button
-              className='p-2 bg-gray-100 rounded-2xl hidden md:block'
+              className='p-2 bg-gray-100 rounded-2xl hidden md:block cursor-pointer'
               onClick={logout}
               title='signout'
             >
@@ -195,7 +195,7 @@ export default function RootLayout({ children }) {
 
             {/* Mobile Menu Toggle */}
             <button
-              className='p-2 bg-gray-100 rounded-2xl lg:hidden'
+              className='p-2 bg-gray-100 rounded-2xl lg:hidden cursor-pointer'
               onClick={() => setIsMenuOpen(!isMenuOpen)}
             >
               <div className='p-2 bg-gray-100 hover:bg-gray-200 rounded-xl'>
@@ -254,7 +254,7 @@ export default function RootLayout({ children }) {
             </Link> */}
             <button
               onClick={logout}
-              className='w-full text-left px-4 py-3 rounded-xl bg-red-100 text-red-600 mt-4 flex items-center gap-2'
+              className='w-full text-left px-4 py-3 rounded-xl bg-red-100 text-red-600 mt-4 flex items-center gap-2 cursor-pointer'
             >
               <LogOut size={18} />
               Logout

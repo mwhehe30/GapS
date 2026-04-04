@@ -155,6 +155,7 @@ export default function SignIn() {
               required
               className='w-full px-4 py-3 rounded-2xl bg-[#8a9199] text-white placeholder-gray-200 outline-none focus:ring-2 focus:ring-gray-500 '
             />
+            
             <Link href={"/lupa-kata-sandi"} className='text-xs text-gray-600 -mt-1 ml-1 cursor-pointer hover:underline'>
               Lupa Kata Sandi?
             </Link>

@@ -276,14 +276,14 @@ const AnalyticsPage = () => {
 
       {/* Advisory for users with no skills */}
       {!analysisLoading && userSkillIds.length === 0 && (
-        <div className='p-6 bg-indigo-50 border border-indigo-100 rounded-2xl flex flex-col md:flex-row items-center justify-between gap-4 shadow-sm animate-in fade-in slide-in-from-top-4 duration-500'>
-          <div className='flex items-center gap-4 text-indigo-800 text-left'>
-            <div className='p-3 bg-indigo-100 rounded-xl shrink-0'>
+        <div className='p-6 bg-[#212529]/5 border border-indigo-100 rounded-2xl flex flex-col md:flex-row items-center justify-between gap-4 shadow-sm animate-in fade-in slide-in-from-top-4 duration-500'>
+          <div className='flex items-center gap-4 text-[#212529]/80 text-left'>
+            <div className='p-3 bg-[#212529]/10 rounded-xl shrink-0'>
               <AlertCircle className='w-6 h-6' />
             </div>
             <div>
               <h3 className='font-bold text-lg'>Lengkapi Daftar Skill Anda</h3>
-              <p className='text-indigo-700/80 mt-1 font-medium'>
+              <p className='text-[#212529]/60 mt-1 font-medium'>
                 Anda belum menambahkan skill apapun di profil. Tambahkan skill
                 yang Anda miliki agar kami dapat menganalisis gap secara akurat.
               </p>
@@ -291,7 +291,7 @@ const AnalyticsPage = () => {
           </div>
           <Link
             href='/profile'
-            className='px-6 py-4 w-full md:w-auto bg-gray-900 text-white rounded-xl font-bold hover:bg-gray-800 transition-all shadow-lg text-center shrink-0'
+            className='px-6 py-4 w-full md:w-auto bg-gray-900 text-white rounded-xl font-bold hover:bg-gray-800 transition-all shadow-lg text-center shrink-0 cursor-pointer'
           >
             Atur Skill Sekarang
           </Link>

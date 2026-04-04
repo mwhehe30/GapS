@@ -114,7 +114,7 @@ export default function SignUp() {
         <ArrowLeft size={16} />
         Beranda
       </Link>
-      <div className='flex gap-8 w-full max-w-4xl items-stretch'>
+      <div className='flex gap-8 w-full max-w-4xl items-stretch mt-4'>
         {/* Form - left */}
         <div className='flex-1 flex flex-col mx-auto justify-center items-center'>
           <h1 className='text-4xl font-black text-gray-900 mb-1'>

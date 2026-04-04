@@ -44,7 +44,7 @@ const SkillSelector = ({
       <button
         type="button"
         onClick={() => setShowSkillSelector(!showSkillSelector)}
-        className='w-full flex items-center justify-between p-4'
+        className='w-full flex items-center justify-between p-4 cursor-pointer'
       >
         <div className='flex items-center gap-4 text-left'>
           <div className='p-3 rounded-xl bg-[#212529]/10 text-gray-600'>
@@ -83,7 +83,7 @@ const SkillSelector = ({
             {Object.keys(skillsByCategory).length > 0 ? (
               Object.entries(skillsByCategory).map(([category, skills]) => (
                 <div key={category} className='space-y-4'>
-                  <h3 className='text-sm font-bold text-gray-700 uppercase tracking-widest px-1'>
+                  <h3 className='text-sm font-bold text-gray-600 uppercase tracking-widest px-1'>
                     {formatCategory(category)}
                   </h3>
                   <div className={`grid gap-3 ${
