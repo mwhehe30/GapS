@@ -88,11 +88,20 @@ export default function SignUp() {
     const formData = new FormData(e.currentTarget);
     const firstName = formData.get('first_name');
     const lastName = formData.get('last_name');
+    const email = formData.get('email');
+    const password = formData.get('password');
+
+    // Validasi password minimal 6 karakter
+    if (password.length < 6) {
+      setLoading(false);
+      showToast('Password minimal 6 karakter');
+      return;
+    }
 
     // Gabungin nama depan & belakang buat metadata
     const { error } = await supabase.auth.signUp({
-      email: formData.get('email'),
-      password: formData.get('password'),
+      email,
+      password,
       options: {
         data: {
           full_name: `${firstName} ${lastName}`.trim(),
@@ -100,8 +109,17 @@ export default function SignUp() {
       },
     });
     setLoading(false);
-    if (error) showToast(error.message);
-    else {
+    
+    if (error) {
+      // Handle specific error untuk email sudah terdaftar
+      if (error.message.includes('already registered') || 
+          error.message.includes('User already registered') ||
+          error.status === 422) {
+        showToast('Email sudah terdaftar. Silakan gunakan email lain atau login.');
+      } else {
+        showToast(error.message);
+      }
+    } else {
       showToast('Registrasi berhasil! Silakan cek email kamu.', 'success');
       setTimeout(() => router.push('/signin'), 1500);
     }
@@ -182,8 +200,9 @@ export default function SignUp() {
             <input
               name='password'
               type='password'
-              placeholder='Password'
+              placeholder='Password (minimal 6 karakter)'
               required
+              minLength={6}
               className='px-4 py-3 rounded-2xl bg-[#8a9199] text-white placeholder-gray-200 outline-none focus:ring-2 focus:ring-gray-500'
             />
 
