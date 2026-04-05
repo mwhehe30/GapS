@@ -84,7 +84,7 @@ export default function SignUp() {
   const handleRegister = async (e) => {
     e.preventDefault();
     setLoading(true);
-    // Ekstrak data dari form pendaftaran
+    
     const formData = new FormData(e.currentTarget);
     const firstName = formData.get('first_name');
     const lastName = formData.get('last_name');
@@ -98,30 +98,47 @@ export default function SignUp() {
       return;
     }
 
-    // Gabungin nama depan & belakang buat metadata
-    const { error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        data: {
-          full_name: `${firstName} ${lastName}`.trim(),
+    try {
+      // Coba signup
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: {
+            full_name: `${firstName} ${lastName}`.trim(),
+          },
+          emailRedirectTo: window.location.origin,
         },
-      },
-    });
-    setLoading(false);
-    
-    if (error) {
-      // Handle specific error untuk email sudah terdaftar
-      if (error.message.includes('already registered') || 
-          error.message.includes('User already registered') ||
-          error.status === 422) {
-        showToast('Email sudah terdaftar. Silakan gunakan email lain atau login.');
-      } else {
-        showToast(error.message);
+      });
+      
+      setLoading(false);
+      
+      if (error) {
+        // Handle error dari Supabase
+        if (error.message.includes('already registered') || 
+            error.message.includes('User already registered') ||
+            error.status === 422) {
+          showToast('Email sudah terdaftar. Silakan gunakan email lain atau login.');
+        } else {
+          showToast(error.message);
+        }
+        return;
       }
-    } else {
-      showToast('Registrasi berhasil! Silakan cek email kamu.', 'success');
-      setTimeout(() => router.push('/signin'), 1500);
+
+      // Cek apakah user sudah ada (Supabase return user tapi dengan identities kosong jika email sudah ada)
+      if (data.user && data.user.identities && data.user.identities.length === 0) {
+        showToast('Email sudah terdaftar. Silakan gunakan email lain atau login.');
+        return;
+      }
+
+      // Sukses signup
+      showToast('Registrasi berhasil! Silakan cek email kamu untuk verifikasi.', 'success');
+      setTimeout(() => router.push('/signin'), 2000);
+      
+    } catch (err) {
+      setLoading(false);
+      showToast('Terjadi kesalahan. Silakan coba lagi.');
+      console.error('Signup error:', err);
     }
   };
 
