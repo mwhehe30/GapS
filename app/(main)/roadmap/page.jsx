@@ -3,8 +3,14 @@
 import { useEffect, useState, useMemo } from 'react';
 import { supabase } from '@/lib/supabase';
 import { useRouter } from 'next/navigation';
-import { getAnalysis, getRoadmap } from '@/lib/api';
-import Skeleton from '@/components/Skeleton';
+import { 
+  getAnalysis, 
+  getRoadmap, 
+  updateRoadmapStatus,
+  getRoadmapProgress,
+  updatePhaseStatus 
+} from '@/lib/api';
+import Loading from '@/components/Loading';
 import Link from 'next/link';
 import {
   Clock,
@@ -36,6 +42,7 @@ export default function RoadmapPage() {
   const [activeFilter, setActiveFilter] = useState('semua');
   const [phaseStatuses, setPhaseStatuses] = useState({});
   const [user, setUser] = useState(null);
+  const [sessionToken, setSessionToken] = useState(null);
 
   useEffect(() => {
     const init = async () => {
@@ -61,6 +68,7 @@ export default function RoadmapPage() {
       setProfile(profileData);
 
       if (session?.access_token) {
+        setSessionToken(session.access_token);
         try {
           // Ambil barengan data analisis sama roadmap-nya
           const [analysisData, roadmapData] = await Promise.all([
@@ -69,6 +77,44 @@ export default function RoadmapPage() {
           ]);
           setAnalysis(analysisData);
           setRoadmap(roadmapData.roadmap);
+
+          // Ambil progress fase dari database
+          if (roadmapData.roadmap?.id) {
+            try {
+              const progressData = await getRoadmapProgress(
+                session.access_token,
+                roadmapData.roadmap.id
+              );
+              
+              // Convert array progress ke object { phase: status }
+              const statusMap = {};
+              progressData.progress.forEach(p => {
+                statusMap[p.phase] = p.status;
+              });
+              
+              // Set status dari database, atau default jika belum ada
+              if (Object.keys(statusMap).length > 0) {
+                setPhaseStatuses(statusMap);
+              } else if (roadmapData.roadmap.content?.phases) {
+                // Inisialisasi default jika belum ada di database
+                const initial = {};
+                roadmapData.roadmap.content.phases.forEach((p, index) => {
+                  initial[p.phase] = index === 0 ? 'berjalan' : 'belum';
+                });
+                setPhaseStatuses(initial);
+              }
+            } catch (err) {
+              console.error('Failed to fetch progress:', err);
+              // Fallback ke default
+              if (roadmapData.roadmap.content?.phases) {
+                const initial = {};
+                roadmapData.roadmap.content.phases.forEach((p, index) => {
+                  initial[p.phase] = index === 0 ? 'berjalan' : 'belum';
+                });
+                setPhaseStatuses(initial);
+              }
+            }
+          }
         } catch (err) {
           const errorMessage = err?.message || '';
           if (
@@ -86,45 +132,45 @@ export default function RoadmapPage() {
   }, [router]);
 
   useEffect(() => {
-    // Sesuaiin status per fase (ambil dari localStorage kalau ada)
-    if (roadmap?.content?.phases && user?.id) {
-      setPhaseStatuses((prev) => {
-        if (Object.keys(prev).length === 0) {
-          const savedStr = localStorage.getItem(`gaps_phases_${user.id}`);
-          if (savedStr) {
-            try {
-              return JSON.parse(savedStr);
-            } catch (e) {}
-          }
-          const initial = {};
-          roadmap.content.phases.forEach((p, index) => {
-            initial[p.phase] = index === 0 ? 'berjalan' : 'belum';
-          });
-          return initial;
-        }
-        return prev;
-      });
-      setOpenPhase((prev) =>
-        prev === 0 ? roadmap.content.phases[0].phase : prev,
-      );
+    // Set fase pertama sebagai open phase default
+    if (roadmap?.content?.phases && openPhase === 0) {
+      setOpenPhase(roadmap.content.phases[0].phase);
     }
-  }, [roadmap, user?.id]);
+  }, [roadmap, openPhase]);
 
-  useEffect(() => {
-    // Simpan perubahan status fase ke localStorage tiap ada update
-    if (user?.id && Object.keys(phaseStatuses).length > 0) {
-      localStorage.setItem(
-        `gaps_phases_${user.id}`,
-        JSON.stringify(phaseStatuses),
-      );
-    }
-  }, [phaseStatuses, user?.id]);
-
-  const togglePhaseStatus = (phaseNumber, targetStatus) => {
+  const togglePhaseStatus = async (phaseNumber, targetStatus) => {
+    // Update UI optimistically
     setPhaseStatuses((prev) => ({
       ...prev,
-      [phaseNumber]: targetStatus,
+      [phaseNumber]: targetStatus
     }));
+
+    // Sync ke database
+    if (roadmap?.id && sessionToken) {
+      try {
+        await updatePhaseStatus(sessionToken, roadmap.id, phaseNumber, targetStatus);
+        
+        // Hitung status keseluruhan roadmap
+        const updatedStatuses = { ...phaseStatuses, [phaseNumber]: targetStatus };
+        const allStatuses = Object.values(updatedStatuses);
+        let roadmapStatus = 'belum selesai';
+        if (allStatuses.every((s) => s === 'selesai')) {
+          roadmapStatus = 'selesai';
+        } else if (allStatuses.some((s) => s === 'berjalan' || s === 'selesai')) {
+          roadmapStatus = 'berjalan';
+        }
+
+        // Update status roadmap keseluruhan
+        await updateRoadmapStatus(sessionToken, roadmap.id, roadmapStatus);
+      } catch (err) {
+        console.error('Failed to update phase status:', err);
+        // Rollback on error
+        setPhaseStatuses((prev) => ({
+          ...prev,
+          [phaseNumber]: prev[phaseNumber]
+        }));
+      }
+    }
   };
 
   const content = roadmap?.content;
@@ -181,13 +227,7 @@ export default function RoadmapPage() {
   }, [phasesWithStatus, activeFilter]);
 
   if (loading) {
-    return (
-      <div className='max-w-7xl pb-4 mx-auto space-y-4'>
-        <Skeleton className='h-24 w-full rounded-2xl' />
-        <Skeleton className='h-40 w-full rounded-2xl' />
-        <Skeleton className='h-[500px] w-full rounded-2xl' />
-      </div>
-    );
+    return <Loading fullScreen />;
   }
 
   return (
@@ -216,39 +256,45 @@ export default function RoadmapPage() {
       ) : (
         <>
           {/* Career path card */}
-          <section className='bg-linear-to-bl from-gray-900 from-65% to-90% to-gray-800 rounded-3xl p-4 border border-gray-300 shadow-sm flex flex-col gap-4'>
-            <div className='flex flex-wrap items-center gap-3'>
-              <div className='flex items-center gap-2 px-4 py-2 rounded-xl text-white text-sm font-medium capitalize'>
-                <BriefcaseBusiness className='w-4 h-4' />
-                {profile?.current_position || 'Posisi saat ini'}
+          <section className='bg-linear-to-bl from-gray-900 from-65% to-90% to-gray-800 rounded-3xl p-4 md:p-6 border border-gray-300 shadow-sm space-y-4'>
+            {/* Career Path */}
+            <div className='flex flex-col sm:flex-row sm:items-center gap-3'>
+              <div className='flex items-center gap-2 px-4 py-2 rounded-xl bg-gray-800/50 text-white text-sm font-medium'>
+                <BriefcaseBusiness className='w-4 h-4 shrink-0' />
+                <span className='truncate'>{profile?.current_position || 'Posisi saat ini'}</span>
               </div>
-              <TrendingUp className='w-5 h-5 text-gray-400 shrink-0' />
-              <div className='flex items-center gap-2 px-4 py-2 bg-gray-900 text-white rounded-xl text-sm font-medium capitalize'>
-                <Target className='w-4 h-4' />
-                {profile?.job_roles?.name || 'Posisi target'}
+              <TrendingUp className='w-5 h-5 text-gray-400 shrink-0 hidden sm:block' />
+              <div className='flex items-center gap-2 sm:hidden text-gray-400'>
+                <TrendingUp className='w-4 h-4 shrink-0' />
+                <div className='h-px flex-1 bg-gray-600' />
+              </div>
+              <div className='flex items-center gap-2 px-4 py-2 bg-gray-900 text-white rounded-xl text-sm font-medium'>
+                <Target className='w-4 h-4 shrink-0' />
+                <span className='truncate'>{profile?.job_roles?.name || 'Posisi target'}</span>
               </div>
             </div>
 
-            <div className='flex items-center gap-2 text-sm text-gray-500'>
-              <Clock className='w-4 h-4' />
-              Estimasi waktu:
+            {/* Estimated Duration */}
+            <div className='flex items-center gap-2 text-sm text-gray-400'>
+              <Clock className='w-4 h-4 shrink-0' />
+              <span>Estimasi waktu:</span>
               <span className='font-semibold text-gray-100'>
                 {content.estimatedDuration || '-'}
               </span>
             </div>
 
             {/* Progress bar */}
-            <div className='space-y-1'>
-              <div className='h-2.5 bg-gray-500 rounded-full overflow-hidden'>
+            <div className='space-y-2'>
+              <div className='h-2.5 bg-gray-700 rounded-full overflow-hidden'>
                 <div
                   className='h-full bg-gray-100 rounded-full transition-all duration-700'
                   style={{ width: `${score}%` }}
                 />
               </div>
-            </div>
-            <div className='flex justify-end text-xs gap-2 text-gray-500'>
-              <span>Readiness:</span>
-              <span>{score}% selesai</span>
+              <div className='flex justify-between items-center text-xs'>
+                <span className='text-gray-400'>Readiness Score</span>
+                <span className='font-semibold text-gray-100'>{score}% selesai</span>
+              </div>
             </div>
           </section>
 
@@ -290,9 +336,9 @@ export default function RoadmapPage() {
           <div className='rounded-3xl bg-gray-100 border border-gray-300 p-4'>
             <div className='grid grid-cols-1 xl:grid-cols-[minmax(200px,240px)_1fr_minmax(220px,280px)] gap-4'>
               {/* Kolom kiri — ringkasan */}
-              <div className='grid grid-cols-1 sm:grid-cols-3 xl:grid-cols-1 gap-3 xl:gap-4 h-fit'>
-                <div className='bg-white rounded-3xl border border-gray-300 p-4 shadow-sm'>
-                  <div className='flex items-center gap-3 mb-5'>
+              <div className='grid grid-cols-1 sm:grid-cols-3 xl:grid-cols-1 gap-3 xl:gap-4 h-full'>
+                <div className='bg-white rounded-3xl border border-gray-300 p-4 shadow-sm flex flex-col'>
+                  <div className='flex items-center gap-3 mb-auto'>
                     <div className='bg-gray-800 rounded-xl w-10 h-10 grid place-items-center text-white shrink-0'>
                       <Loader className='w-5 h-5' strokeWidth={2} />
                     </div>
@@ -300,13 +346,13 @@ export default function RoadmapPage() {
                       Sedang Dipelajari
                     </span>
                   </div>
-                  <p className='text-3xl font-semibold text-gray-800 tabular-nums'>
+                  <p className='text-3xl 2xl:text-5xl font-semibold text-gray-800 tabular-nums text-right mt-4'>
                     {stats.sedang}
                   </p>
                 </div>
 
-                <div className='bg-white rounded-3xl border border-gray-300 p-4 shadow-sm'>
-                  <div className='flex items-center gap-3 mb-5'>
+                <div className='bg-white rounded-3xl border border-gray-300 p-4 shadow-sm flex flex-col'>
+                  <div className='flex items-center gap-3 mb-auto'>
                     <div className='bg-gray-800 rounded-xl w-10 h-10 grid place-items-center text-white shrink-0'>
                       <BadgeCheck className='w-5 h-5' strokeWidth={2} />
                     </div>
@@ -314,13 +360,13 @@ export default function RoadmapPage() {
                       Fase Selesai
                     </span>
                   </div>
-                  <p className='text-3xl font-semibold text-gray-800 tabular-nums'>
+                  <p className='text-3xl 2xl:text-5xl font-semibold text-gray-800 tabular-nums text-right mt-4'>
                     {stats.selesai}
                   </p>
                 </div>
 
-                <div className='bg-white rounded-3xl border border-gray-300 p-4 shadow-sm'>
-                  <div className='flex items-center gap-3 mb-5'>
+                <div className='bg-white rounded-3xl border border-gray-300 p-4 shadow-sm flex flex-col'>
+                  <div className='flex items-center gap-3 mb-auto'>
                     <div className='bg-gray-800 rounded-xl w-10 h-10 grid place-items-center text-white shrink-0'>
                       <Pause className='w-5 h-5' strokeWidth={2} />
                     </div>
@@ -328,7 +374,7 @@ export default function RoadmapPage() {
                       Fase Tersisa
                     </span>
                   </div>
-                  <p className='text-3xl font-semibold text-gray-800 tabular-nums'>
+                  <p className='text-3xl 2xl:text-5xl font-semibold text-gray-800 tabular-nums text-right mt-4'>
                     {stats.tersisa}
                   </p>
                 </div>
@@ -358,7 +404,7 @@ export default function RoadmapPage() {
                   </div>
                 </div>
 
-                <div className='overflow-y-auto max-h-[520px] px-1 py-1 -mx-1 space-y-0 flex-1'>
+                <div className='overflow-y-auto max-h-[60vh] px-1 py-1 -mx-1 space-y-0 flex-1'>
                   {visiblePhases.length === 0 ? (
                     <p className='text-sm text-gray-500 py-8 text-center'>
                       Tidak ada fase untuk filter ini.
@@ -523,7 +569,7 @@ export default function RoadmapPage() {
               </div>
 
               {/* Kolom kanan — resource */}
-              <div className='bg-white rounded-3xl border border-gray-300 p-4 md:p-5 shadow-sm h-fit xl:sticky xl:top-8 overflow-y-auto max-h-[80vh]'>
+              <div className='bg-white rounded-3xl border border-gray-300 p-4 md:p-5 shadow-sm h-fit xl:sticky xl:top-8 overflow-y-auto max-h-[70vh]'>
                 <h2 className='text-base font-semibold text-gray-800 mb-4'>
                   Rekomendasi Resource Belajar
                 </h2>

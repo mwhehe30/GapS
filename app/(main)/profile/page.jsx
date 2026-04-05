@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import Skeleton from '@/components/Skeleton';
+import Loading from '@/components/Loading';
 import {
   User,
   Mail,
@@ -154,16 +154,11 @@ const ProfilePage = () => {
   };
 
   if (loading) {
-    return (
-      <div className='max-w-4xl mx-auto py-8 space-y-8'>
-        <Skeleton className='h-[450px] w-full rounded-3xl' />
-        <Skeleton className='h-32 w-full rounded-2xl' />
-      </div>
-    );
+    return <Loading fullScreen />;
   }
 
   return (
-    <div className='max-w-7xl mx-auto py-8 space-y-8'>
+    <div className='max-w-7xl mx-auto pb-4 space-y-6'>
       <header className='space-y-2'>
         <h1 className='text-3xl md:text-5xl'>Profile</h1>
         <p className='text-lg md:text-2xl text-gray-900/70'>
@@ -173,7 +168,7 @@ const ProfilePage = () => {
 
       {message && (
         <div
-          className={`p-4 rounded-xl flex items-center gap-3 animate-in fade-in slide-in-from-top-2 duration-300 ${
+          className={`p-4 rounded-2xl flex items-center gap-3 animate-in fade-in slide-in-from-top-2 duration-300 ${
             message.type === 'success'
               ? 'bg-green-50 border border-green-200 text-green-700'
               : 'bg-red-50 border border-red-200 text-red-700'
@@ -188,95 +183,157 @@ const ProfilePage = () => {
         </div>
       )}
 
-      <div className='bg-gray-100 rounded-3xl p-4 md:p-6 shadow-sm border border-gray-200'>
-        <form onSubmit={handleSave} className='space-y-8'>
-          <div className='grid grid-cols-1 md:grid-cols-2 gap-8'>
-            {/* Full Name */}
-            <div className='space-y-2'>
-              <label className='text-sm font-bold text-gray-500 uppercase tracking-wider ml-1'>
-                Nama Lengkap
-              </label>
-              <div className='relative group'>
-                <div className='absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none'>
-                  <User className='w-5 h-5 text-gray-400 group-focus-within:text-indigo-500 transition-colors' />
-                </div>
-                <input
-                  type='text'
-                  value={fullName}
-                  onChange={(e) => setFullName(e.target.value)}
-                  className='w-full pl-12 pr-4 py-4 bg-gray-50 border border-gray-200 rounded-2xl focus:outline-none focus:ring-4 focus:ring-indigo-100 focus:border-indigo-500 transition-all text-gray-900 font-medium'
-                  placeholder='Masukkan nama lengkap'
-                  required
-                />
+      <div className='grid grid-cols-1 lg:grid-cols-3 gap-6'>
+        {/* Profile Card - Left Side */}
+        <div className='lg:col-span-1'>
+          <div className='bg-gray-100 rounded-3xl p-6 shadow-sm border border-gray-300 space-y-6 h-full flex flex-col justify-between'>
+            {/* Avatar */}
+            <div className='flex flex-col items-center text-center space-y-4'>
+              <div className='w-24 h-24 rounded-2xl bg-linear-to-br from-gray-900 to-gray-700 flex items-center justify-center text-white text-4xl font-bold shadow-lg'>
+                {user?.user_metadata?.full_name?.[0]?.toUpperCase() || 'U'}
+              </div>
+              <div>
+                <h2 className='text-xl font-bold text-gray-900'>
+                  {user?.user_metadata?.full_name || 'User'}
+                </h2>
+                <p className='text-sm text-gray-600 mt-1'>{user?.email}</p>
               </div>
             </div>
 
-            {/* Email (Read-only) */}
-            <div className='space-y-2'>
-              <label className='text-sm font-bold text-gray-500 uppercase tracking-wider ml-1'>
-                Email (Tidak dapat diubah)
-              </label>
-              <div className='relative'>
-                <div className='absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none'>
-                  <Mail className='w-5 h-5 text-gray-400' />
+            {/* Quick Info */}
+            <div className='space-y-3 pt-4 border-t border-gray-300'>
+              <div className='flex items-center gap-3 text-sm'>
+                <div className='w-10 h-10 rounded-xl bg-gray-900 flex items-center justify-center shrink-0'>
+                  <Briefcase className='w-5 h-5 text-white' />
                 </div>
-                <input
-                  type='email'
-                  value={user?.email || ''}
-                  disabled
-                  className='w-full pl-12 pr-4 py-4 bg-gray-200 border border-gray-200 rounded-2xl text-gray-500 font-medium cursor-not-allowed opacity-70'
-                />
+                <div className='min-w-0'>
+                  <p className='text-xs text-gray-500 font-medium'>
+                    Posisi Saat Ini
+                  </p>
+                  <p className='font-semibold text-gray-900 truncate'>
+                    {currentPosition || 'Belum diatur'}
+                  </p>
+                </div>
+              </div>
+
+              <div className='flex items-center gap-3 text-sm'>
+                <div className='w-10 h-10 rounded-xl bg-gray-800 flex items-center justify-center shrink-0'>
+                  <CheckCircle className='w-5 h-5 text-white' />
+                </div>
+                <div className='min-w-0'>
+                  <p className='text-xs text-gray-500 font-medium'>
+                    Total Skills
+                  </p>
+                  <p className='font-semibold text-gray-900'>
+                    {userSkillIds.length} skill
+                  </p>
+                </div>
               </div>
             </div>
 
-            {/* Current Position */}
-            <div className='space-y-2 md:col-span-2'>
-              <label className='text-sm font-bold text-gray-500 uppercase tracking-wider ml-1'>
-                Pekerjaan / Posisi Saat Ini
-              </label>
-              <div className='relative group'>
-                <div className='absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none'>
-                  <Briefcase className='w-5 h-5 text-gray-400 group-focus-within:text-indigo-500 transition-colors' />
-                </div>
-                <input
-                  type='text'
-                  value={currentPosition}
-                  onChange={(e) => setCurrentPosition(e.target.value)}
-                  className='w-full pl-12 pr-4 py-4 bg-gray-50 border border-gray-200 rounded-2xl focus:outline-none focus:ring-4 focus:ring-indigo-100 focus:border-indigo-500 transition-all text-gray-900 font-medium'
-                  placeholder='Contoh: Senior Frontend Developer'
-                  required
-                />
-              </div>
-            </div>
-          </div>
-
-          <div className='pt-4 flex justify-end flex-col md:flex-row gap-3'>
+            {/* Change Password Button */}
             <Link
               href='/reset-kata-sandi?from=profile'
-              className='flex items-center justify-center gap-2 px-6 py-4 bg-gray-100 text-gray-700 rounded-2xl font-bold text-base md:text-lg hover:bg-gray-200 transition-all border border-gray-200'
+              className='flex items-center justify-center gap-2 w-full px-4 py-3 bg-white text-gray-700 rounded-2xl font-semibold text-sm hover:bg-gray-50 transition-all border border-gray-300 shadow-sm'
             >
-              <KeyRound className='w-5 h-5' />
+              <KeyRound className='w-4 h-4' />
               Ganti Password
             </Link>
-            <button
-              type='submit'
-              disabled={saving}
-              className='flex items-center justify-center gap-3 px-10 py-4 bg-gray-900 text-white rounded-2xl font-bold text-base md:text-lg hover:bg-gray-800 transition-all hover:scale-[1.02] active:scale-[0.98] disabled:opacity-70 shadow-lg shadow-gray-200'
-            >
-              {saving ? (
-                <>
-                  <Loader2 className='w-5 h-5 animate-spin' />
-                  Menyimpan...
-                </>
-              ) : (
-                <>
-                  <Save className='w-5 h-5' />
-                  Simpan Perubahan
-                </>
-              )}
-            </button>
           </div>
-        </form>
+        </div>
+
+        {/* Form Card - Right Side */}
+        <div className='lg:col-span-2'>
+          <div className='bg-gray-100 rounded-3xl p-6 shadow-sm border border-gray-300'>
+            <h3 className='text-xl font-bold text-gray-900 mb-6'>
+              Informasi Profil
+            </h3>
+
+            <form onSubmit={handleSave} className='space-y-6'>
+              {/* Full Name */}
+              <div className='space-y-2'>
+                <label className='text-sm font-semibold text-gray-700'>
+                  Nama Lengkap
+                </label>
+                <div className='relative group'>
+                  <div className='absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none'>
+                    <User className='w-5 h-5 text-gray-400 group-focus-within:text-gray-900 transition-colors' />
+                  </div>
+                  <input
+                    type='text'
+                    value={fullName}
+                    onChange={(e) => setFullName(e.target.value)}
+                    className='w-full pl-12 pr-4 py-3.5 bg-white border border-gray-300 rounded-2xl focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent transition-all text-gray-900 font-medium'
+                    placeholder='Masukkan nama lengkap'
+                    required
+                  />
+                </div>
+              </div>
+
+              {/* Email (Read-only) */}
+              <div className='space-y-2'>
+                <label className='text-sm font-semibold text-gray-700'>
+                  Email
+                </label>
+                <div className='relative'>
+                  <div className='absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none'>
+                    <Mail className='w-5 h-5 text-gray-400' />
+                  </div>
+                  <input
+                    type='email'
+                    value={user?.email || ''}
+                    disabled
+                    className='w-full pl-12 pr-4 py-3.5 bg-gray-200 border border-gray-300 rounded-2xl text-gray-500 font-medium cursor-not-allowed'
+                  />
+                </div>
+                <p className='text-xs text-gray-500 ml-1'>
+                  Email tidak dapat diubah
+                </p>
+              </div>
+
+              {/* Current Position */}
+              <div className='space-y-2'>
+                <label className='text-sm font-semibold text-gray-700'>
+                  Pekerjaan / Posisi Saat Ini
+                </label>
+                <div className='relative group'>
+                  <div className='absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none'>
+                    <Briefcase className='w-5 h-5 text-gray-400 group-focus-within:text-gray-900 transition-colors' />
+                  </div>
+                  <input
+                    type='text'
+                    value={currentPosition}
+                    onChange={(e) => setCurrentPosition(e.target.value)}
+                    className='w-full pl-12 pr-4 py-3.5 bg-white border border-gray-300 rounded-2xl focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent transition-all text-gray-900 font-medium'
+                    placeholder='Contoh: Senior Frontend Developer'
+                    required
+                  />
+                </div>
+              </div>
+
+              {/* Save Button */}
+              <div className='pt-4'>
+                <button
+                  type='submit'
+                  disabled={saving}
+                  className='w-full flex items-center justify-center gap-2 px-6 py-4 bg-gray-900 text-white rounded-2xl font-bold text-base hover:bg-gray-800 transition-all disabled:opacity-70 shadow-lg'
+                >
+                  {saving ? (
+                    <>
+                      <Loader2 className='w-5 h-5 animate-spin' />
+                      Menyimpan...
+                    </>
+                  ) : (
+                    <>
+                      <Save className='w-5 h-5' />
+                      Simpan Perubahan
+                    </>
+                  )}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
       </div>
 
       {/* Skill Selection Section */}
@@ -287,18 +344,20 @@ const ProfilePage = () => {
       />
 
       {/* Info Card */}
-      <div className='p-4 bg-[#212529]/5 rounded-3xl border border-indigo-100 flex gap-4'>
-        <div className='p-3 bg-[#212529]/10 rounded-xl shrink-0'>
-          <AlertCircle className='w-6 h-6 text-gray-600' />
-        </div>
-        <div>
-          <h3 className='font-bold text-[#212529]/80'>
-            Mengapa melengkapi profil?
-          </h3>
-          <p className='text-[#212529]/60 text-sm mt-1'>
-            Informasi pekerjaan saat ini digunakan untuk menganalisis gap skill
-            Anda secara lebih akurat dalam fitur Smart Analytics.
-          </p>
+      <div className='p-6 bg-gray-100 rounded-3xl border border-gray-300 shadow-sm'>
+        <div className='flex items-start gap-4'>
+          <div className='p-3 bg-gray-900 rounded-xl shrink-0'>
+            <AlertCircle className='w-6 h-6 text-white' />
+          </div>
+          <div>
+            <h3 className='font-bold text-gray-900 text-lg'>
+              Mengapa melengkapi profil?
+            </h3>
+            <p className='text-gray-600 text-sm mt-1'>
+              Informasi pekerjaan saat ini digunakan untuk menganalisis gap
+              skill Anda secara lebih akurat dalam fitur Smart Analytics.
+            </p>
+          </div>
         </div>
       </div>
     </div>

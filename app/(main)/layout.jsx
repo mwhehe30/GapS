@@ -10,6 +10,7 @@ export default function RootLayout({ children }) {
   const [showUserModal, setShowUserModal] = useState(false);
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   const router = useRouter();
   const pathname = usePathname(); // Cari tahu lagi di halaman mana sekarang
   const [isMenuOpen, setIsMenuOpen] = useState(false); // Status menu mobile (tutup/buka)
@@ -58,6 +59,12 @@ export default function RootLayout({ children }) {
     router.push('/signin');
   };
 
+  const handleLogoutClick = () => {
+    setShowUserModal(false);
+    setIsMenuOpen(false);
+    setShowLogoutConfirm(true);
+  };
+
   // Tampilin null/kosong dulu pas lagi nunggu status login
   if (loading) {
     return null;
@@ -65,6 +72,38 @@ export default function RootLayout({ children }) {
 
   return (
     <main className='bg-gray-200 min-h-screen'>
+      {/* Logout Confirmation Dialog */}
+      {showLogoutConfirm && (
+        <div className='fixed inset-0 z-50 flex items-center justify-center bg-black/30'>
+          <div className='bg-white rounded-2xl shadow-xl p-6 w-80 flex flex-col gap-4'>
+            <div className='flex items-center gap-3'>
+              <div className='w-10 h-10 bg-red-100 rounded-xl flex items-center justify-center'>
+                <LogOut size={18} className='text-red-600' />
+              </div>
+              <div>
+                <p className='font-semibold text-gray-900'>Keluar dari akun?</p>
+                <p className='text-xs text-gray-500'>
+                  Kamu harus login lagi untuk melanjutkan.
+                </p>
+              </div>
+            </div>
+            <div className='flex gap-2'>
+              <button
+                onClick={() => setShowLogoutConfirm(false)}
+                className='flex-1 py-2.5 rounded-xl bg-gray-100 text-gray-700 text-sm font-medium hover:bg-gray-200 transition-colors cursor-pointer'
+              >
+                Batal
+              </button>
+              <button
+                onClick={logout}
+                className='flex-1 py-2.5 rounded-xl bg-red-500 text-white text-sm font-medium hover:bg-red-600 transition-colors cursor-pointer'
+              >
+                Ya, Keluar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
       <header className='container mx-auto p-4 transition-colors duration-300 bg-transparent top-0 z-50'>
         <nav className='flex items-center justify-between'>
           <Link href='/' className='text-2xl font-bold text-gray-900/70'>
@@ -171,7 +210,7 @@ export default function RootLayout({ children }) {
                         Lihat Profil
                       </Link>
                       <button
-                        onClick={logout}
+                        onClick={handleLogoutClick}
                         className='w-full flex items-center gap-2 px-4 py-3 rounded-lg hover:bg-red-50 text-red-600 transition-colors text-sm font-medium cursor-pointer'
                       >
                         <LogOut size={18} />
@@ -185,7 +224,7 @@ export default function RootLayout({ children }) {
 
             <button
               className='p-2 bg-gray-100 rounded-2xl hidden md:block cursor-pointer'
-              onClick={logout}
+              onClick={handleLogoutClick}
               title='signout'
             >
               <div className='p-2 bg-gray-100 hover:bg-red-200 rounded-xl'>
@@ -253,7 +292,7 @@ export default function RootLayout({ children }) {
               Profile
             </Link> */}
             <button
-              onClick={logout}
+              onClick={handleLogoutClick}
               className='w-full text-left px-4 py-3 rounded-xl bg-red-100 text-red-600 mt-4 flex items-center gap-2 cursor-pointer'
             >
               <LogOut size={18} />

@@ -1,223 +1,270 @@
-'use client'
+'use client';
 
-import { useState, useEffect } from 'react'
-import { useRouter } from 'next/navigation'
-import Link from 'next/link'
-import { supabase } from '@/lib/supabase'
+import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import Link from 'next/link';
+import { supabase } from '@/lib/supabase';
 import {
   Lock,
   CheckCircle,
-  ArrowLeft
-} from 'lucide-react'
+  ArrowLeft,
+  Eye,
+  EyeOff,
+  Loader2,
+} from 'lucide-react';
 
 export default function ResetKataSandiPage() {
-  const router = useRouter()
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState(null)
-  const [success, setSuccess] = useState(false)
-  const [verifying, setVerifying] = useState(true)
-  const [fromProfile, setFromProfile] = useState(false)
-  const [passwords, setPasswords] = useState({
-    new: '',
-    confirm: '',
-  })
+  const router = useRouter();
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [success, setSuccess] = useState(false);
+  const [verifying, setVerifying] = useState(true);
+  const [validSession, setValidSession] = useState(false);
+  const [showNew, setShowNew] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
+  const [passwords, setPasswords] = useState({ new: '', confirm: '' });
 
   useEffect(() => {
-    const verifySession = async () => {
-      const { data: { session } } = await supabase.auth.getSession()
+    // Supabase mengirim event PASSWORD_RECOVERY saat user klik link dari email
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === 'PASSWORD_RECOVERY' || (event === 'SIGNED_IN' && session)) {
+        setValidSession(true);
+        setVerifying(false);
+      }
+    });
 
+    // Fallback: cek session yang sudah ada (misal akses dari profile)
+    supabase.auth.getSession().then(({ data: { session } }) => {
       if (session) {
-        // User sudah login (akses dari profile)
-        const params = new URLSearchParams(window.location.search)
-        setFromProfile(params.get('from') === 'profile')
-        setVerifying(false)
-        return
+        setValidSession(true);
+        setVerifying(false);
+      } else {
+        // Tunggu sebentar untuk event PASSWORD_RECOVERY dari hash
+        setTimeout(() => {
+          if (!validSession) {
+            setVerifying(false);
+          }
+        }, 2000);
       }
+    });
 
-      // Tidak ada session, cek token dari email reset
-      const hashParams = new URLSearchParams(window.location.hash.substring(1))
-      const accessToken = hashParams.get('access_token')
+    return () => subscription.unsubscribe();
+  }, []);
 
-      if (!accessToken) {
-        router.push('/signin')
-        return
-      }
-
-      setVerifying(false)
-    }
-
-    verifySession()
-  }, [router])
+  const getStrength = (pw) => {
+    if (pw.length === 0) return null;
+    if (pw.length < 6)
+      return { label: 'Terlalu pendek', width: 'w-1/4', color: 'bg-red-400' };
+    if (pw.length < 8)
+      return { label: 'Lemah', width: 'w-2/4', color: 'bg-yellow-400' };
+    if (pw.length < 12)
+      return { label: 'Sedang', width: 'w-3/4', color: 'bg-blue-400' };
+    return { label: 'Kuat', width: 'w-full', color: 'bg-green-400' };
+  };
 
   const handleSubmit = async (e) => {
-    e.preventDefault()
-    setLoading(true)
-    setError(null)
+    e.preventDefault();
+    setError(null);
 
     if (passwords.new !== passwords.confirm) {
-      setError('Kata sandi tidak sama')
-      setLoading(false)
-      return
+      setError('Kata sandi tidak cocok');
+      return;
     }
-
     if (passwords.new.length < 6) {
-      setError('Kata sandi minimal 6 karakter')
-      setLoading(false)
-      return
+      setError('Kata sandi minimal 6 karakter');
+      return;
     }
 
+    setLoading(true);
     const { error } = await supabase.auth.updateUser({
       password: passwords.new,
-    })
+    });
+    setLoading(false);
 
     if (error) {
-      setError(error.message)
-      setLoading(false)
-      return
+      setError(error.message);
+      return;
     }
 
-    setSuccess(true)
-    setLoading(false)
+    setSuccess(true);
+    setTimeout(() => router.push('/signin'), 3000);
+  };
 
-    setTimeout(() => {
-      router.push(fromProfile ? '/profile' : '/signin')
-    }, 3000)
-  }
+  const strength = getStrength(passwords.new);
 
   if (verifying) {
     return (
-      <div className="min-h-screen bg-linear-to-b from-slate-50 to-white flex items-center justify-center p-4">
-        <div className="bg-white rounded-2xl shadow-lg border border-slate-200 p-8 text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#212529] mx-auto"></div>
-          <p className="mt-4 text-slate-600">Memverifikasi link...</p>
+      <div className='min-h-screen bg-gray-200 flex items-center justify-center p-6'>
+        <div className='flex flex-col items-center gap-4'>
+          <Loader2 className='w-8 h-8 animate-spin text-gray-600' />
+          <p className='text-gray-600 text-sm'>Memverifikasi link reset...</p>
         </div>
       </div>
-    )
+    );
+  }
+
+  if (!validSession) {
+    return (
+      <div className='min-h-screen bg-gray-200 flex items-center justify-center p-6'>
+        <div className='w-full max-w-md bg-white rounded-3xl p-8 md:p-10 shadow-xl border border-gray-300'>
+          <div className='w-20 h-20 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-6'>
+            <Lock className='w-10 h-10 text-red-500' />
+          </div>
+          <h1 className='text-3xl md:text-4xl font-black text-gray-900 mb-3 text-center'>
+            Link Tidak Valid
+          </h1>
+          <p className='text-gray-600 text-sm md:text-base mb-8 text-center'>
+            Link reset kata sandi sudah kadaluarsa atau tidak valid. Silakan
+            minta link baru.
+          </p>
+          <Link
+            href='/lupa-kata-sandi'
+            className='w-full py-4 rounded-2xl bg-gray-900 text-white font-semibold hover:bg-gray-800 transition-colors text-center flex items-center justify-center shadow-lg cursor-pointer'
+          >
+            Minta Link Baru
+          </Link>
+        </div>
+      </div>
+    );
   }
 
   return (
-    <div className="min-h-screen bg-linear-to-b from-slate-50 to-white flex items-center justify-center p-4">
-      <div className="w-full max-w-md">
-        <div className="bg-white rounded-2xl shadow-lg border border-slate-200 overflow-hidden">
-          <div className="p-6 border-slate-200 text-center">
-            <div className="mx-auto w-16 h-16 bg-[#212529]/30 rounded-full flex items-center justify-center mb-4">
-              {success ? (
-                <CheckCircle className="w-8 h-8 text-white" />
-              ) : (
-                <Lock className="w-8 h-8 text-white" />
-              )}
-            </div>
-            <h1 className="text-2xl font-bold text-slate-900">
-              {success ? 'Kata sandi Berhasil Diubah!' : 'Buat Kata sandi Baru'}
-            </h1>
-            <p className="text-sm text-slate-600 mt-1">
-              {success
-                ? fromProfile
-                  ? 'Kata sandi Anda sudah diperbarui. Mengalihkan ke profil...'
-                  : 'Kata sandi Anda sudah diperbarui. Mengalihkan ke login...'
-                : 'Masukkan Kata sandi baru untuk akun Anda'}
-            </p>
-          </div>
+    <div className='min-h-screen bg-gray-200 flex items-center justify-center p-6'>
+      <Link
+        href='/signin'
+        className='absolute top-6 left-6 flex items-center gap-1.5 text-sm text-gray-600 hover:text-gray-900 transition-colors cursor-pointer'
+      >
+        <ArrowLeft size={16} />
+        Kembali
+      </Link>
 
-          <div className="p-6">
-            {!success ? (
-              <form onSubmit={handleSubmit} className="space-y-4">
-                {error && (
-                  <div className="bg-[#212529]/10 border border-[#212529] rounded-lg p-3">
-                    <p className="text-sm text-[#212529]">{error}</p>
-                  </div>
-                )}
+      <div className='w-full max-w-md bg-white rounded-3xl p-8 md:p-10 shadow-xl border border-gray-300'>
+        <div className='w-20 h-20 bg-gray-400 rounded-full flex items-center justify-center mx-auto mb-6'>
+          {success ? (
+            <CheckCircle className='w-10 h-10 text-white' />
+          ) : (
+            <Lock className='w-10 h-10 text-white' />
+          )}
+        </div>
 
-                <div className="space-y-2">
-                  <label htmlFor="new" className="text-sm font-medium text-slate-700">
-                    Kata sandi Baru
-                  </label>
-                  <div className="relative">
-                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                      <Lock className="h-5 w-5 text-slate-400" />
-                    </div>
-                    <input
-                      id="new"
-                      type="password"
-                      className="w-full pl-10 pr-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#212529]/80 focus:border-transparent"
-                      placeholder="Minimal 6 karakter"
-                      value={passwords.new}
-                      onChange={(e) => setPasswords({ ...passwords, new: e.target.value })}
-                      required
-                    />
-                  </div>
-                </div>
+        <h1 className='text-xl md:text-2xl font-black text-gray-900 mb-3 text-center'>
+          {success ? 'Berhasil!' : 'Buat Password Baru'}
+        </h1>
+        <p className='text-gray-600 text-sm md:text-base mb-8 text-center'>
+          {success
+            ? 'Kata sandi kamu sudah diperbarui. Mengalihkan ke halaman login...'
+            : 'Masukkan password baru untuk akun Anda'}
+        </p>
 
-                <div className="space-y-2">
-                  <label htmlFor="confirm" className="text-sm font-medium text-slate-700">
-                    Konfirmasi kata sandi Baru
-                  </label>
-                  <div className="relative">
-                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                      <Lock className="h-5 w-5 text-slate-400" />
-                    </div>
-                    <input
-                      id="confirm"
-                      type="password"
-                      className="w-full pl-10 pr-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#212529]/80 focus:border-transparent"
-                      placeholder="Ketik ulang password"
-                      value={passwords.confirm}
-                      onChange={(e) => setPasswords({ ...passwords, confirm: e.target.value })}
-                      required
-                    />
-                  </div>
-                </div>
-
-                {/* Password Strength Indicator */}
-                {passwords.new && (
-                  <div className="space-y-1">
-                    <div className="text-xs text-slate-500">Kekuatan kata sandi:</div>
-                    <div className="w-full h-1.5 bg-slate-200 rounded-full overflow-hidden">
-                      <div
-                        className={`h-full transition-all ${
-                          passwords.new.length < 6
-                            ? 'w-1/3 bg-[#ADB5BD]'
-                            : passwords.new.length < 8
-                              ? 'w-2/3 bg-[#495057]'
-                              : 'w-full bg-[#212529]'
-                        }`}
-                      />
-                    </div>
-                    <p className="text-xs text-slate-500">
-                      {passwords.new.length < 6
-                        ? 'Terlalu pendek'
-                        : passwords.new.length < 8
-                          ? 'Sedang'
-                          : 'Kuat'}
-                    </p>
-                  </div>
-                )}
-
-                <button
-                  type="submit"
-                  disabled={loading}
-                  className="w-full bg-[#212529]/80 hover:bg-[#212529]/90 text-white font-medium py-2 px-4 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed mt-5"
-                >
-                  {loading ? 'Menyimpan...' : 'Ubah Password'}
-                </button>
-              </form>
-            ) : (
-              <div className="bg-[#212529]/10 border border-[#212529]/40 rounded-lg p-3">
-                <p className="text-sm text-[#212529] text-center">
-                  Kata sandi berhasil diubah! Mengalihkan ke halaman login...
-                </p>
+        {!success ? (
+          <form onSubmit={handleSubmit} className='flex flex-col gap-5'>
+            {error && (
+              <div className='px-4 py-3 rounded-2xl bg-red-50 border border-red-200 text-red-700 text-sm'>
+                {error}
               </div>
             )}
-          </div>
 
-          <div className="p-6 border-slate-200 text-center">
-            <Link href={fromProfile ? "/profile" : "/signin"} className="inline-flex items-center text-sm text-[#212529] hover:underline gap-1">
-              <ArrowLeft className="size-4" />
-              {fromProfile ? 'Kembali ke Profil' : 'Kembali ke Login'}
-            </Link>
+            {/* New password */}
+            <div>
+              <label className='block text-sm font-semibold text-gray-700 mb-2'>
+                Password Baru
+              </label>
+              <div className='relative'>
+                <div className='absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none'>
+                  <Lock className='w-5 h-5 text-gray-400' />
+                </div>
+                <input
+                  type={showNew ? 'text' : 'password'}
+                  placeholder='Masukkan password baru'
+                  required
+                  value={passwords.new}
+                  onChange={(e) =>
+                    setPasswords({ ...passwords, new: e.target.value })
+                  }
+                  className='w-full pl-12 pr-12 py-3.5 rounded-2xl bg-gray-50 border border-gray-300 text-gray-900 placeholder-gray-400 outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent transition-all'
+                />
+                <button
+                  type='button'
+                  onClick={() => setShowNew(!showNew)}
+                  className='absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors'
+                >
+                  {showNew ? <EyeOff size={18} /> : <Eye size={18} />}
+                </button>
+              </div>
+
+              {/* Strength indicator */}
+              {strength && (
+                <div className='mt-2'>
+                  <div className='w-full h-2 bg-gray-200 rounded-full overflow-hidden'>
+                    <div
+                      className={`h-full rounded-full transition-all ${strength.width} ${strength.color}`}
+                    />
+                  </div>
+                  <p className='text-xs text-gray-500 mt-1'>{strength.label}</p>
+                </div>
+              )}
+            </div>
+
+            {/* Confirm password */}
+            <div>
+              <label className='block text-sm font-semibold text-gray-700 mb-2'>
+                Konfirmasi Password Baru
+              </label>
+              <div className='relative'>
+                <div className='absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none'>
+                  <Lock className='w-5 h-5 text-gray-400' />
+                </div>
+                <input
+                  type={showConfirm ? 'text' : 'password'}
+                  placeholder='Konfirmasi password baru'
+                  required
+                  value={passwords.confirm}
+                  onChange={(e) =>
+                    setPasswords({ ...passwords, confirm: e.target.value })
+                  }
+                  className='w-full pl-12 pr-12 py-3.5 rounded-2xl bg-gray-50 border border-gray-300 text-gray-900 placeholder-gray-400 outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent transition-all'
+                />
+                <button
+                  type='button'
+                  onClick={() => setShowConfirm(!showConfirm)}
+                  className='absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors'
+                >
+                  {showConfirm ? <EyeOff size={18} /> : <Eye size={18} />}
+                </button>
+              </div>
+
+              {/* Match indicator */}
+              {passwords.confirm && (
+                <p
+                  className={`text-xs mt-2 font-medium ${passwords.new === passwords.confirm ? 'text-green-600' : 'text-red-500'}`}
+                >
+                  {passwords.new === passwords.confirm
+                    ? '✓ Kata sandi cocok'
+                    : '✗ Kata sandi tidak cocok'}
+                </p>
+              )}
+            </div>
+
+            <button
+              type='submit'
+              disabled={loading}
+              className='w-full py-4 rounded-2xl bg-gray-900 text-white font-semibold hover:bg-gray-800 transition-colors disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-lg mt-2'
+            >
+              {loading ? (
+                <Loader2 className='w-5 h-5 animate-spin' />
+              ) : (
+                'Ubah Password'
+              )}
+            </button>
+          </form>
+        ) : (
+          <div className='px-5 py-4 rounded-2xl bg-green-50 border border-green-200 text-green-700 text-sm text-center font-medium'>
+            Mengalihkan ke halaman login...
           </div>
-        </div>
+        )}
       </div>
     </div>
-  )
+  );
 }

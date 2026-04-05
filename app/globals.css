@@ -40,6 +40,24 @@ h6 {
   font-family: var(--font-poppins), Poppins, sans-serif;
 }
 
+/* Add cursor pointer to all clickable elements */
+a,
+button,
+[role="button"],
+[type="button"],
+[type="submit"],
+[type="reset"],
+select {
+  cursor: pointer;
+}
+
+button:disabled,
+[type="button"]:disabled,
+[type="submit"]:disabled,
+[type="reset"]:disabled {
+  cursor: not-allowed;
+}
+
 .inverted-radius-kanan {
   --r: 20px;
   --s: 20px;

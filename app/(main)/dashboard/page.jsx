@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase';
 import { useRouter } from 'next/navigation';
-import Skeleton from '@/components/Skeleton';
+import Loading from '@/components/Loading';
 import Link from 'next/link';
 import {
   Target,
@@ -119,37 +119,7 @@ export default function Page() {
   );
 
   if (loading) {
-    return (
-      <div className='pb-4'>
-        <div className='max-w-7xl mx-auto space-y-8'>
-          {/* Header Skeleton */}
-          <header>
-            <Skeleton className='h-12 w-96 rounded-lg' />
-          </header>
-
-          <section className='space-y-4'>
-            {/* Stats row Skeleton */}
-            <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4'>
-              {[1, 2, 3, 4].map((i) => (
-                <Skeleton key={i} className='h-32 w-full rounded-2xl' />
-              ))}
-            </div>
-
-            {/* Profile + Analysis Skeleton */}
-            <div className='grid grid-cols-1 lg:grid-cols-5 gap-4'>
-              <Skeleton className='lg:col-span-2 h-[450px] w-full rounded-2xl' />
-              <Skeleton className='lg:col-span-3 h-[450px] w-full rounded-2xl' />
-            </div>
-
-            {/* Skills + Roadmap Skeleton */}
-            <div className='grid grid-cols-1 lg:grid-cols-2 gap-4'>
-              <Skeleton className='h-[400px] w-full rounded-2xl' />
-              <Skeleton className='h-[400px] w-full rounded-2xl' />
-            </div>
-          </section>
-        </div>
-      </div>
-    );
+    return <Loading fullScreen />;
   }
 
   const roadmapContent = roadmap?.content;
@@ -258,7 +228,7 @@ export default function Page() {
                       </p>
                     </div>
                   </div>
-                  <Link href='/analytics' className='hover:underline shrink-0'>
+                  <Link href='/analytics' className='hover:underline shrink-0 cursor-pointer'>
                     Lihat detail
                   </Link>
                 </div>
@@ -267,9 +237,11 @@ export default function Page() {
 
                 {!analysisLoading && analysis ? (
                   analysis.gapSkills?.length > 0 ? (
-                    <ul className='space-y-2'>
-                      {analysis.masteredSkills
-                        ? analysis.masteredSkills?.map((skill, i) => (
+                    <>
+                      <ul className='space-y-2'>
+                        {analysis.masteredSkills
+                          ?.slice(0, 5)
+                          .map((skill, i) => (
                             <li
                               key={skill.id}
                               className='p-2 bg-white border-2 border-gray-200 rounded-xl'
@@ -291,27 +263,47 @@ export default function Page() {
                                 </div>
                               </div>
                             </li>
-                          ))
-                        : null}
-                      {analysis.gapSkills.map((skill, i) => (
-                        <li
-                          key={skill.id}
-                          className='p-2 bg-white border-2 border-gray-200 rounded-xl'
-                        >
-                          <div className='flex items-center gap-2'>
-                            <div className='size-11 rounded-lg bg-gray-900 grid place-items-center text-white shrink-0'>
-                              {i + 1 + (analysis.masteredSkills?.length || 0)}
-                            </div>
-                            <div className='font-medium text-gray-900 truncate'>
-                              <h3>{skill.name}</h3>
-                              <p className='text-xs text-gray-600'>
-                                {formatCategory(skill.category)}
-                              </p>
-                            </div>
+                          ))}
+                        {(() => {
+                          const masteredCount =
+                            analysis.masteredSkills?.length || 0;
+                          const remainingSlots = Math.max(0, 5 - masteredCount);
+                          return analysis.gapSkills
+                            .slice(0, remainingSlots)
+                            .map((skill, i) => (
+                              <li
+                                key={skill.id}
+                                className='p-2 bg-white border-2 border-gray-200 rounded-xl'
+                              >
+                                <div className='flex items-center gap-2'>
+                                  <div className='size-11 rounded-lg bg-gray-900 grid place-items-center text-white shrink-0'>
+                                    {i + 1 + masteredCount}
+                                  </div>
+                                  <div className='font-medium text-gray-900 truncate'>
+                                    <h3>{skill.name}</h3>
+                                    <p className='text-xs text-gray-600'>
+                                      {formatCategory(skill.category)}
+                                    </p>
+                                  </div>
+                                </div>
+                              </li>
+                            ));
+                        })()}
+                      </ul>
+                      {(() => {
+                        const totalSkills =
+                          (analysis.masteredSkills?.length || 0) +
+                          (analysis.gapSkills?.length || 0);
+                        const remainingSkills = totalSkills - 5;
+                        return remainingSkills > 0 ? (
+                          <div className='text-center'>
+                            <p className='text-sm text-gray-600'>
+                              Dan {remainingSkills} skill lainnya.{' '}
+                            </p>
                           </div>
-                        </li>
-                      ))}
-                    </ul>
+                        ) : null;
+                      })()}
+                    </>
                   ) : (
                     <div>Belum ada skill gap yang terdeteksi.</div>
                   )
@@ -323,7 +315,7 @@ export default function Page() {
                     </p>
                     <Link
                       href='/analytics'
-                      className='text-sm text-gray-600 hover:underline'
+                      className='text-sm text-gray-600 hover:underline cursor-pointer'
                     >
                       Ke Analytics
                     </Link>
@@ -374,7 +366,7 @@ export default function Page() {
                       </p>
                       <Link
                         href='/profile'
-                        className='text-sm text-gray-600 hover:underline'
+                        className='text-sm text-gray-600 hover:underline cursor-pointer'
                       >
                         Ke Profile
                       </Link>
@@ -397,7 +389,7 @@ export default function Page() {
                       </p>
                     </div>
                   </div>
-                  <Link href='/roadmap' className='hover:underline shrink-0'>
+                  <Link href='/roadmap' className='hover:underline shrink-0 cursor-pointer'>
                     Lihat detail
                   </Link>
                 </div>

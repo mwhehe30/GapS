@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase';
 import { useRouter } from 'next/navigation';
-import Skeleton from '@/components/Skeleton';
+import Loading from '@/components/Loading';
 import {
   getAnalysis,
   getJobRoles,
@@ -249,12 +249,7 @@ const AnalyticsPage = () => {
   };
 
   if (loading) {
-    return (
-      <div className='max-w-7xl pb-4 mx-auto space-y-8'>
-        <Skeleton className='h-48 w-full rounded-2xl' />
-        <Skeleton className='h-[400px] w-full rounded-2xl md:rounded-3xl' />
-      </div>
-    );
+    return <Loading fullScreen />;
   }
 
   return (
@@ -276,25 +271,30 @@ const AnalyticsPage = () => {
 
       {/* Advisory for users with no skills */}
       {!analysisLoading && userSkillIds.length === 0 && (
-        <div className='p-6 bg-[#212529]/5 border border-indigo-100 rounded-2xl flex flex-col md:flex-row items-center justify-between gap-4 shadow-sm animate-in fade-in slide-in-from-top-4 duration-500'>
-          <div className='flex items-center gap-4 text-[#212529]/80 text-left'>
-            <div className='p-3 bg-[#212529]/10 rounded-xl shrink-0'>
-              <AlertCircle className='w-6 h-6' />
+        <div className='p-6 bg-gray-100 border border-gray-300 rounded-3xl shadow-sm animate-in fade-in slide-in-from-top-4 duration-500'>
+          <div className='flex flex-col md:flex-row items-center justify-between gap-4'>
+            <div className='flex items-center gap-4 text-left'>
+              <div className='p-3 bg-gray-900 rounded-xl shrink-0'>
+                <AlertCircle className='w-6 h-6 text-white' />
+              </div>
+              <div>
+                <h3 className='font-bold text-lg text-gray-900'>
+                  Lengkapi Daftar Skill Anda
+                </h3>
+                <p className='text-gray-600 mt-1'>
+                  Anda belum menambahkan skill apapun di profil. Tambahkan skill
+                  yang Anda miliki agar kami dapat menganalisis gap secara
+                  akurat.
+                </p>
+              </div>
             </div>
-            <div>
-              <h3 className='font-bold text-lg'>Lengkapi Daftar Skill Anda</h3>
-              <p className='text-[#212529]/60 mt-1 font-medium'>
-                Anda belum menambahkan skill apapun di profil. Tambahkan skill
-                yang Anda miliki agar kami dapat menganalisis gap secara akurat.
-              </p>
-            </div>
+            <Link
+              href='/profile'
+              className='px-6 py-4 w-full md:w-auto bg-gray-900 text-white rounded-2xl font-bold hover:bg-gray-800 transition-all shadow-lg text-center shrink-0'
+            >
+              Atur Skill Sekarang
+            </Link>
           </div>
-          <Link
-            href='/profile'
-            className='px-6 py-4 w-full md:w-auto bg-gray-900 text-white rounded-xl font-bold hover:bg-gray-800 transition-all shadow-lg text-center shrink-0 cursor-pointer'
-          >
-            Atur Skill Sekarang
-          </Link>
         </div>
       )}
 
@@ -372,9 +372,8 @@ const AnalyticsPage = () => {
             className='space-y-4 animate-in fade-in duration-700'
           >
             {analysisLoading ? (
-              <div className='grid grid-cols-1 md:grid-cols-5 gap-4'>
-                <Skeleton className='md:col-span-2 h-[400px] w-full rounded-2xl' />
-                <Skeleton className='md:col-span-3 h-[400px] w-full rounded-2xl' />
+              <div className='flex items-center justify-center h-[400px]'>
+                <Loading size='large' />
               </div>
             ) : (
               <div className='space-y-4'>
@@ -398,7 +397,7 @@ const AnalyticsPage = () => {
                       </span>
                       <span className='text-xl text-gray-400 mb-1'>%</span>
                     </div>
-                    <div className='w-full h-3 bg-gray-800 rounded-full overflow-hidden'>
+                    <div className='w-full h-3 bg-gray-500 rounded-full overflow-hidden'>
                       <div
                         className='h-full bg-white transition-all duration-1000'
                         style={{ width: `${analysis?.readinessScore || 0}%` }}
@@ -551,37 +550,50 @@ const AnalyticsPage = () => {
                 )}
 
                 {/* Roadmap Generation Action Area */}
-                <div className='p-4 bg-indigo-50 border border-indigo-200 rounded-3xl flex flex-col items-center justify-center text-center space-y-4 shadow-sm'>
-                  <div className='p-4 bg-white rounded-2xl shadow-sm'>
-                    <Target className='w-8 h-8 text-indigo-600' />
-                  </div>
-                  <div>
-                    <h2 className='text-2xl font-bold text-gray-900'>
-                      Siap untuk Level Up?
-                    </h2>
-                    <p className='text-gray-600 mt-2 max-w-lg mx-auto'>
-                      Berdasarkan analisis skill gap Anda, kami dapat menyusun
-                      Roadmap Belajar yang dipersonalisasi langkah demi langkah.
-                    </p>
-                    {!canGenerateRoadmap && (
-                      <div className='mt-4 inline-block px-4 py-2 bg-yellow-100 text-yellow-800 rounded-lg text-sm font-medium'>
-                        <AlertCircle className='inline w-4 h-4 mr-2 mb-0.5' />
-                        Anda baru bisa membuat roadmap baru dalam{' '}
-                        {daysRemaining} hari lagi.
+                <div className='p-6 md:p-8 bg-gray-100 border border-gray-300 rounded-3xl shadow-sm'>
+                  <div className='flex flex-col md:flex-row items-center justify-between gap-6'>
+                    <div className='flex items-center gap-4 text-left'>
+                      <div className='p-4 bg-gray-900 rounded-2xl shrink-0'>
+                        <Target className='w-8 h-8 text-white' />
                       </div>
-                    )}
+                      <div>
+                        <h2 className='text-xl md:text-2xl font-bold text-gray-900'>
+                          Siap untuk Level Up?
+                        </h2>
+                        <p className='text-gray-600 mt-1'>
+                          Berdasarkan analisis skill gap Anda, kami dapat
+                          menyusun Roadmap Belajar yang dipersonalisasi langkah
+                          demi langkah.
+                        </p>
+                        {!canGenerateRoadmap && (
+                          <div className='mt-3 inline-flex items-center gap-2 px-4 py-2 bg-yellow-50 border border-yellow-200 text-yellow-800 rounded-xl text-sm font-medium'>
+                            <AlertCircle className='w-4 h-4 shrink-0' />
+                            <span>
+                              Anda baru bisa membuat roadmap baru dalam{' '}
+                              {daysRemaining} hari lagi.
+                            </span>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                    <button
+                      onClick={handleGenerateRoadmap}
+                      disabled={roadmapLoading || !canGenerateRoadmap}
+                      className='px-8 py-4 bg-gray-900 text-white rounded-2xl font-bold hover:bg-gray-800 transition-all shadow-lg active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 w-full md:w-auto shrink-0'
+                    >
+                      {roadmapLoading ? (
+                        <>
+                          <Loader2 className='w-5 h-5 animate-spin' />
+                          Generating...
+                        </>
+                      ) : (
+                        <>
+                          <Target className='w-5 h-5' />
+                          Generate Roadmap
+                        </>
+                      )}
+                    </button>
                   </div>
-                  <button
-                    onClick={handleGenerateRoadmap}
-                    disabled={roadmapLoading || !canGenerateRoadmap}
-                    className='mt-4 px-8 py-4 bg-indigo-600 text-white rounded-xl font-bold hover:bg-indigo-700 transition-colors shadow-lg active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2'
-                  >
-                    {roadmapLoading ? (
-                      <Loader2 className='w-5 h-5 animate-spin' />
-                    ) : (
-                      'Generate Learning Roadmap'
-                    )}
-                  </button>
                 </div>
               </div>
             )}

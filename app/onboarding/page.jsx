@@ -84,14 +84,14 @@ export default function OnboardingPage() {
 
   if (loading) {
     return (
-      <div className='min-h-screen bg-[#dde3e8] flex items-center justify-center'>
+      <div className='min-h-screen bg-gray-200 flex items-center justify-center'>
         <div className='w-8 h-8 border-4 border-gray-400 border-t-gray-800 rounded-full animate-spin' />
       </div>
     );
   }
 
   return (
-    <div className='min-h-screen bg-[#dde3e8] flex items-center justify-center p-6'>
+    <div className='min-h-screen bg-gray-200 flex items-center justify-center p-6'>
       <div className={`flex-1 flex flex-col justify-center items-center w-full mx-auto ${step === 1 ? 'max-w-sm' : 'max-w-3xl'}`}>
 
         {/* Progress dots */}
@@ -122,14 +122,14 @@ export default function OnboardingPage() {
                 onChange={(e) => setCurrentPosition(e.target.value)}
                 placeholder='Contoh: Junior Web Developer'
                 required
-                className='w-full pl-12 pr-4 py-3 rounded-2xl bg-[#8a9199] text-white placeholder-gray-200 outline-none focus:ring-2 focus:ring-gray-500'
+                className='w-full pl-12 pr-4 py-3 rounded-2xl bg-gray-500 text-white placeholder-gray-200 outline-none focus:ring-2 focus:ring-gray-600'
               />
             </div>
 
             <button
               type='submit'
               disabled={saving || !currentPosition.trim()}
-              className='w-full py-3 rounded-2xl bg-[#c8cdd2] text-gray-800 font-medium hover:bg-[#b8bec4] transition-colors disabled:opacity-60 flex items-center justify-center gap-2'
+              className='w-full py-3 rounded-2xl bg-gray-300 text-gray-800 font-medium hover:bg-gray-400 transition-colors disabled:opacity-60 flex items-center justify-center gap-2 cursor-pointer'
             >
               {saving ? (
                 <Loader2 className='w-4 h-4 animate-spin' />
@@ -155,7 +155,7 @@ export default function OnboardingPage() {
 
             <button
               onClick={handleFinish}
-              className='w-full py-3 rounded-2xl bg-[#c8cdd2] text-gray-800 font-medium hover:bg-[#b8bec4] transition-colors flex items-center justify-center gap-2'
+              className='w-full py-3 rounded-2xl bg-gray-300 text-gray-800 font-medium hover:bg-gray-400 transition-colors flex items-center justify-center gap-2 cursor-pointer'
             >
               Mulai Sekarang
               <CheckCircle className='w-4 h-4' />
@@ -163,7 +163,7 @@ export default function OnboardingPage() {
 
             <button
               onClick={handleFinish}
-              className='w-full py-3 rounded-2xl text-gray-500 text-sm hover:text-gray-700 transition-colors'
+              className='w-full py-3 rounded-2xl text-gray-500 text-sm hover:text-gray-700 transition-colors cursor-pointer'
             >
               Lewati & Selesai
             </button>

@@ -62,6 +62,12 @@ function DecorPanel() {
 export default function SignUp() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
+  const [toast, setToast] = useState(null); // { message, type: 'error' | 'success' }
+
+  const showToast = (message, type = 'error') => {
+    setToast({ message, type });
+    setTimeout(() => setToast(null), 4000);
+  };
   useEffect(() => {
     // Kalau udah terlanjur login, pindahin langsung ke dashboard
     const checkUser = async () => {
@@ -94,10 +100,10 @@ export default function SignUp() {
       },
     });
     setLoading(false);
-    if (error) alert(error.message);
+    if (error) showToast(error.message);
     else {
-      alert('Registrasi berhasil! Silakan cek email kamu.');
-      router.push('/signin');
+      showToast('Registrasi berhasil! Silakan cek email kamu.', 'success');
+      setTimeout(() => router.push('/signin'), 1500);
     }
   };
 
@@ -110,7 +116,14 @@ export default function SignUp() {
 
   return (
     <div className='min-h-screen bg-[#dde3e8] flex items-center justify-center p-6'>
-      <Link href='/' className='absolute top-6 left-6 flex items-center gap-1.5 text-sm text-gray-600 hover:text-gray-900 transition-colors'>
+      {toast && (
+        <div className={`fixed top-6 left-1/2 -translate-x-1/2 z-50 px-5 py-3 rounded-2xl text-sm font-medium shadow-lg transition-all ${
+          toast.type === 'error' ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'
+        }`}>
+          {toast.message}
+        </div>
+      )}
+      <Link href='/' className='absolute top-6 left-6 flex items-center gap-1.5 text-sm text-gray-600 hover:text-gray-900 transition-colors cursor-pointer'>
         <ArrowLeft size={16} />
         Beranda
       </Link>
@@ -130,7 +143,7 @@ export default function SignUp() {
           <div className='flex bg-[#b0b8c1] rounded-2xl p-1 mb-6 w-full max-w-100'>
             <Link
               href='/signin'
-              className='flex-1 text-center py-2 rounded-2xl text-gray-700 text-sm font-medium hover:text-gray-900 transition-colors'
+              className='flex-1 text-center py-2 rounded-2xl text-gray-700 text-sm font-medium hover:text-gray-900 transition-colors cursor-pointer'
             >
               Login
             </Link>
@@ -177,7 +190,7 @@ export default function SignUp() {
             <button
               type='submit'
               disabled={loading}
-              className='py-3 rounded-2xl bg-[#c8cdd2] text-gray-800 font-medium hover:bg-[#b8bec4] transition-colors disabled:opacity-60 '
+              className='py-3 rounded-2xl bg-[#c8cdd2] text-gray-800 font-medium hover:bg-[#b8bec4] transition-colors disabled:opacity-60 cursor-pointer'
             >
               {loading ? 'Memuat...' : 'Daftar'}
             </button>
@@ -194,7 +207,7 @@ export default function SignUp() {
           <div className='flex justify-center'>
             <button
               onClick={handleGoogle}
-              className='w-12 h-12 rounded-2xl bg-[#c8cdd2] flex items-center justify-center hover:bg-[#b8bec4] transition-colors'
+              className='w-12 h-12 rounded-2xl bg-[#c8cdd2] flex items-center justify-center hover:bg-[#b8bec4] transition-colors cursor-pointer'
             >
               <svg
                 width='20'
