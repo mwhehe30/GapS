@@ -112,7 +112,7 @@ const page = () => {
             </p>
             <div className='flex flex-wrap gap-4'>
               <Link
-                href='/analysis'
+                href='/analytics'
                 className='bg-gray-900 text-white px-6 py-3.5 rounded-xl text-sm font-bold hover:bg-gray-800 transition-all shadow-lg hover:shadow-xl hover:-translate-y-0.5'
               >
                 Analisis Skill Saya
@@ -349,7 +349,7 @@ const page = () => {
             </p>
             <div className='flex flex-wrap gap-4'>
               <Link
-                href='/analysis'
+                href='/analytics'
                 className='px-5 py-2.5 bg-white text-gray-900 rounded-lg text-sm font-bold hover:bg-gray-100 transition-colors'
               >
                 Get Started
@@ -402,7 +402,7 @@ const page = () => {
             <h4 className='text-base font-bold'>Platform</h4>
             <div className='flex flex-col gap-2 text-sm text-gray-900/70'>
               <Link href='/'>Home</Link>
-              <Link href='/analysis'>Skill Analysis</Link>
+              <Link href='/analytics'>Skill analytics</Link>
               <Link href='/roadmap'>Roadmap</Link>
               <Link href='/dashboard'>Dashboard</Link>
             </div>
