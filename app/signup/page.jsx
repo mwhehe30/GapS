@@ -84,7 +84,7 @@ export default function SignUp() {
   const handleRegister = async (e) => {
     e.preventDefault();
     setLoading(true);
-    
+
     const formData = new FormData(e.currentTarget);
     const firstName = formData.get('first_name');
     const lastName = formData.get('last_name');
@@ -110,12 +110,12 @@ export default function SignUp() {
           emailRedirectTo: window.location.origin,
         },
       });
-      
+
       setLoading(false);
-      
+
       if (error) {
         // Handle error dari Supabase
-        if (error.message.includes('already registered') || 
+        if (error.message.includes('already registered') ||
             error.message.includes('User already registered') ||
             error.status === 422) {
           showToast('Email sudah terdaftar. Silakan gunakan email lain atau login.');
@@ -134,7 +134,7 @@ export default function SignUp() {
       // Sukses signup
       showToast('Registrasi berhasil! Silakan cek email kamu untuk verifikasi.', 'success');
       setTimeout(() => router.push('/signin'), 2000);
-      
+
     } catch (err) {
       setLoading(false);
       showToast('Terjadi kesalahan. Silakan coba lagi.');
@@ -144,9 +144,10 @@ export default function SignUp() {
 
   const handleGoogle = async () => {
     // Daftar/Login pakai akun Google
-    await supabase.auth.signInWithOAuth({
-      provider: 'google',
-    });
+    // await supabase.auth.signInWithOAuth({
+    //   provider: 'google',
+    // });
+    alert('Login dengan Google belum diimplementasikan');
   };
 
   return (

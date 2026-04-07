@@ -103,9 +103,11 @@ export default function SignIn() {
 
   const handleGoogle = async () => {
     // Login lewat Google OAuth
-    await supabase.auth.signInWithOAuth({
-      provider: 'google',
-    });
+    // await supabase.auth.signInWithOAuth({
+    //   provider: 'google',
+    // });
+    alert('Login dengan Google belum diimplementasikan');
+
   };
 
   return (
@@ -124,7 +126,7 @@ export default function SignIn() {
       <div className='flex gap-8 w-full max-w-4xl items-stretch'>
         {/* Decor panel - left */}
         <div className='hidden md:flex flex-1'>
-          
+
           <DecorPanel />
         </div>
 
@@ -168,7 +170,7 @@ export default function SignIn() {
               required
               className='w-full px-4 py-3 rounded-2xl bg-[#8a9199] text-white placeholder-gray-200 outline-none focus:ring-2 focus:ring-gray-500 '
             />
-            
+
             <Link href={"/lupa-kata-sandi"} className='text-xs text-gray-600 -mt-1 ml-1 cursor-pointer hover:underline'>
               Lupa Kata Sandi?
             </Link>
