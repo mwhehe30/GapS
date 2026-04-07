@@ -16,18 +16,36 @@ export default function LupaKataSandiPage() {
     setLoading(true);
     setError(null);
 
-    const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `${window.location.origin}/reset-kata-sandi`,
-    });
+    try {
+      // Validasi format email
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(email)) {
+        setError('Format email tidak valid');
+        setLoading(false);
+        return;
+      }
 
-    if (error) {
-      setError(error.message);
+      // Kirim reset password email
+      const { error: resetError } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/reset-kata-sandi`,
+      });
+
+      if (resetError) {
+        setError('Terjadi kesalahan. Silakan coba lagi.');
+        setLoading(false);
+        return;
+      }
+
+      // Supabase selalu return success untuk security (tidak expose apakah email terdaftar atau tidak)
+      // Ini adalah best practice untuk mencegah email enumeration attack
+      setSuccess(true);
       setLoading(false);
-      return;
+      
+    } catch (err) {
+      setError('Terjadi kesalahan. Silakan coba lagi.');
+      setLoading(false);
+      console.error('Reset password error:', err);
     }
-
-    setSuccess(true);
-    setLoading(false);
   };
 
   return (
@@ -55,7 +73,7 @@ export default function LupaKataSandiPage() {
         </h1>
         <p className='text-gray-600 text-sm md:text-base mb-8 text-center'>
           {success
-            ? 'Kami sudah mengirim link reset password ke email Anda'
+            ? 'Jika email Anda terdaftar, kami sudah mengirim link reset password'
             : 'Masukkan email Anda, kami akan kirim link untuk reset password'}
         </p>
 
@@ -102,19 +120,27 @@ export default function LupaKataSandiPage() {
           <div className='flex flex-col gap-4'>
             <div className='px-5 py-4 rounded-2xl bg-gray-100 border border-gray-300'>
               <p className='text-sm text-gray-700 mb-1'>
-                Link reset password telah dikirim ke
+                Jika email terdaftar, link reset password telah dikirim ke
               </p>
               <p className='font-semibold text-gray-900'>{email}</p>
             </div>
 
             <div className='px-5 py-4 rounded-2xl bg-gray-100 border border-gray-300 text-gray-700 text-sm'>
-              Tidak menerima email? Cek folder spam atau{' '}
-              <button
-                onClick={() => setSuccess(false)}
-                className='underline font-semibold hover:text-gray-900 transition-colors cursor-pointer'
-              >
-                Kirim ulang
-              </button>
+              <p className='mb-2'>
+                Tidak menerima email? Cek folder spam atau{' '}
+                <button
+                  onClick={() => setSuccess(false)}
+                  className='underline font-semibold hover:text-gray-900 transition-colors cursor-pointer'
+                >
+                  Kirim ulang
+                </button>
+              </p>
+              <p className='text-xs text-gray-600 mt-2'>
+                Jika email tidak terdaftar, Anda tidak akan menerima email.{' '}
+                <Link href='/signup' className='underline font-semibold hover:text-gray-900 cursor-pointer'>
+                  Daftar di sini
+                </Link>
+              </p>
             </div>
           </div>
         )}
