@@ -56,12 +56,12 @@ export default function ResetKataSandiPage() {
   const getStrength = (pw) => {
     if (pw.length === 0) return null;
     if (pw.length < 6)
-      return { label: 'Terlalu pendek', width: 'w-1/4', color: 'bg-red-400' };
+      return { label: 'Terlalu pendek', width: 'w-1/4', color: 'bg-gray-400' };
     if (pw.length < 8)
-      return { label: 'Lemah', width: 'w-2/4', color: 'bg-yellow-400' };
+      return { label: 'Lemah', width: 'w-2/4', color: 'bg-gray-500' };
     if (pw.length < 12)
-      return { label: 'Sedang', width: 'w-3/4', color: 'bg-blue-400' };
-    return { label: 'Kuat', width: 'w-full', color: 'bg-green-400' };
+      return { label: 'Sedang', width: 'w-3/4', color: 'bg-gray-700' };
+    return { label: 'Kuat', width: 'w-full', color: 'bg-gray-900' };
   };
 
   const handleSubmit = async (e) => {
