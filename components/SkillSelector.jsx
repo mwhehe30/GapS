@@ -31,13 +31,30 @@ const SkillSelector = ({
   }, [allSkills, searchQuery]);
 
   const skillsByCategory = useMemo(() => {
-    return filteredSkills.reduce((acc, skill) => {
+    const categorized = filteredSkills.reduce((acc, skill) => {
       const category = skill.category || 'Lainnya';
       if (!acc[category]) acc[category] = [];
       acc[category].push(skill);
       return acc;
     }, {});
-  }, [filteredSkills]);
+
+    // Sort skills dalam setiap kategori: selected skills di atas
+    Object.keys(categorized).forEach(category => {
+      categorized[category].sort((a, b) => {
+        const aSelected = userSkillIds.includes(a.id);
+        const bSelected = userSkillIds.includes(b.id);
+        
+        // Jika a selected dan b tidak, a di atas
+        if (aSelected && !bSelected) return -1;
+        // Jika b selected dan a tidak, b di atas
+        if (!aSelected && bSelected) return 1;
+        // Jika sama-sama selected atau sama-sama tidak, sort by name
+        return a.name.localeCompare(b.name);
+      });
+    });
+
+    return categorized;
+  }, [filteredSkills, userSkillIds]);
 
   return (
     <div className='bg-gray-100 rounded-3xl overflow-hidden shadow-sm border border-gray-200'>
