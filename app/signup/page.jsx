@@ -107,7 +107,7 @@ export default function SignUp() {
           data: {
             full_name: `${firstName} ${lastName}`.trim(),
           },
-          emailRedirectTo: window.location.origin,
+          emailRedirectTo: `${window.location.origin}/onboarding`,
         },
       });
 
