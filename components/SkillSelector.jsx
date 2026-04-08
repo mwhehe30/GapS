@@ -30,31 +30,36 @@ const SkillSelector = ({
     );
   }, [allSkills, searchQuery]);
 
+  // Pisahkan selected skills dan unselected skills
+  const { selectedSkills, unselectedSkills } = useMemo(() => {
+    const selected = [];
+    const unselected = [];
+    
+    filteredSkills.forEach(skill => {
+      if (userSkillIds.includes(skill.id)) {
+        selected.push(skill);
+      } else {
+        unselected.push(skill);
+      }
+    });
+
+    // Sort alphabetically
+    selected.sort((a, b) => a.name.localeCompare(b.name));
+    unselected.sort((a, b) => a.name.localeCompare(b.name));
+
+    return { selectedSkills: selected, unselectedSkills: unselected };
+  }, [filteredSkills, userSkillIds]);
+
   const skillsByCategory = useMemo(() => {
-    const categorized = filteredSkills.reduce((acc, skill) => {
+    const categorized = unselectedSkills.reduce((acc, skill) => {
       const category = skill.category || 'Lainnya';
       if (!acc[category]) acc[category] = [];
       acc[category].push(skill);
       return acc;
     }, {});
 
-    // Sort skills dalam setiap kategori: selected skills di atas
-    Object.keys(categorized).forEach(category => {
-      categorized[category].sort((a, b) => {
-        const aSelected = userSkillIds.includes(a.id);
-        const bSelected = userSkillIds.includes(b.id);
-        
-        // Jika a selected dan b tidak, a di atas
-        if (aSelected && !bSelected) return -1;
-        // Jika b selected dan a tidak, b di atas
-        if (!aSelected && bSelected) return 1;
-        // Jika sama-sama selected atau sama-sama tidak, sort by name
-        return a.name.localeCompare(b.name);
-      });
-    });
-
     return categorized;
-  }, [filteredSkills, userSkillIds]);
+  }, [unselectedSkills]);
 
   return (
     <div className='bg-gray-100 rounded-3xl overflow-hidden shadow-sm border border-gray-200'>
@@ -97,6 +102,39 @@ const SkillSelector = ({
           </div>
 
           <div className='space-y-10 max-h-[400px] overflow-y-auto pr-4 custom-scrollbar'>
+            {/* Selected Skills Section - Tampil di paling atas */}
+            {selectedSkills.length > 0 && (
+              <div className='space-y-4'>
+                <h3 className='text-sm font-bold text-gray-900 uppercase tracking-widest px-1 flex items-center gap-2'>
+                  <CheckCircle className='w-4 h-4' />
+                  Skills Terpilih ({selectedSkills.length})
+                </h3>
+                <div className={`grid gap-3 ${
+                  columns === 'compact'
+                    ? 'grid-cols-1 sm:grid-cols-2'
+                    : 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5'
+                }`}>
+                  {selectedSkills.map((skill) => (
+                    <button
+                      key={skill.id}
+                      type="button"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        onToggle(skill.id);
+                      }}
+                      className='flex items-center justify-between gap-2 p-4 rounded-xl text-sm font-medium transition-all group bg-gray-900 text-white shadow-lg'
+                    >
+                      <span className='truncate'>{skill.name}</span>
+                      <div className='p-1 rounded-md shrink-0 transition-colors bg-white/20'>
+                        <Minus className='w-3 h-3' />
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Unselected Skills by Category */}
             {Object.keys(skillsByCategory).length > 0 ? (
               Object.entries(skillsByCategory).map(([category, skills]) => (
                 <div key={category} className='space-y-4'>
@@ -108,47 +146,30 @@ const SkillSelector = ({
                       ? 'grid-cols-1 sm:grid-cols-2'
                       : 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5'
                   }`}>
-                    {skills.map((skill) => {
-                      const isSelected = userSkillIds.includes(skill.id);
-                      return (
-                        <button
-                          key={skill.id}
-                          type="button"
-                          onClick={(e) => {
-                            e.preventDefault();
-                            onToggle(skill.id);
-                          }}
-                          className={`flex items-center justify-between gap-2 p-4 rounded-xl text-sm font-medium transition-all group ${
-                            isSelected
-                              ? 'bg-gray-900 text-white shadow-lg'
-                              : 'bg-white border-2 border-gray-200 text-gray-700 hover:border-gray-400 hover:shadow-md'
-                          }`}
-                        >
-                          <span className='truncate'>{skill.name}</span>
-                          <div
-                            className={`p-1 rounded-md shrink-0 transition-colors ${
-                              isSelected
-                                ? 'bg-white/20'
-                                : 'bg-gray-100 group-hover:bg-gray-100'
-                            }`}
-                          >
-                            {isSelected ? (
-                              <Minus className='w-3 h-3' />
-                            ) : (
-                              <Plus className='w-3 h-3' />
-                            )}
-                          </div>
-                        </button>
-                      );
-                    })}
+                    {skills.map((skill) => (
+                      <button
+                        key={skill.id}
+                        type="button"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          onToggle(skill.id);
+                        }}
+                        className='flex items-center justify-between gap-2 p-4 rounded-xl text-sm font-medium transition-all group bg-white border-2 border-gray-200 text-gray-700 hover:border-gray-400 hover:shadow-md'
+                      >
+                        <span className='truncate'>{skill.name}</span>
+                        <div className='p-1 rounded-md shrink-0 transition-colors bg-gray-100 group-hover:bg-gray-100'>
+                          <Plus className='w-3 h-3' />
+                        </div>
+                      </button>
+                    ))}
                   </div>
                 </div>
               ))
-            ) : (
+            ) : selectedSkills.length === 0 ? (
               <div className='text-center py-20 text-gray-500'>
                 Tidak ada skill yang ditemukan untuk pencarian "{searchQuery}"
               </div>
-            )}
+            ) : null}
           </div>
         </div>
       )}
